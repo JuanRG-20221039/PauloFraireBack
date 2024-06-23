@@ -21,7 +21,7 @@ const getBlogById = async (req, res) => {
     try {
         if (!id) {
             const error = new Error('Campos Requeridos');
-     
+
             return res.status(400).json(error.message);
         }
 
@@ -87,6 +87,7 @@ const updateBlog = async (req, res) => {
     const { id } = req.params;
     const { title, description, date } = req.body;
 
+    console.log(title, description, date);
 
     try {
         if (!title || !description || !date) {
