@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from 'bcrypt';
+import generateJWT from "../helpers/generateJWT.js";
 
 const getUsers = async (req, res) => {
     try {
@@ -59,8 +60,21 @@ const login = async (req, res) => {
             const error = new Error('Contraseña incorrecta');
             return res.status(400).json(error.message);
         }
+        const token = generateJWT(user.id);
 
-        res.json({ message: 'Usuario logueado correctamente' });
+
+        const payload = {
+            user: {
+                id: user.id,
+                name: `${user.name} ${user.lastName}`,
+                email: user.email,
+                token: token,
+                role: user.role,
+            },
+        };
+
+
+        res.json(payload);
 
     } catch (error) {
         console.log(error);
