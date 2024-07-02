@@ -87,10 +87,10 @@ const login = async (req, res) => {
 
 const addUser = async (req, res) => {
 
-    const { name, lastName, email, password } = req.body;
+    const { name, lastName, email, password, role } = req.body;
 
     try {
-        if (!name || !lastName || !email || !password) {
+        if (!name || !lastName || !email || !password || !role) {
             const error = new Error('Todos los campos son necesarios');
             return res.status(400).json(error.message);
         }
@@ -106,7 +106,8 @@ const addUser = async (req, res) => {
             name,
             lastName,
             email,
-            password
+            password,
+            role
         });
 
 

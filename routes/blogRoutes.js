@@ -7,7 +7,7 @@ import {
     deleteBlog
 } from '../controllers/blogController.js';
 import upload from '../helpers/uploadImage.js';
-import { checkAuth } from '../middleware/checkAuth.js';
+import { checkAuth, isAdmin } from '../middleware/checkAuth.js';
 
 const router = express.Router();
 

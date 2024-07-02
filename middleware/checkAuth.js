@@ -30,14 +30,14 @@ const checkAuth = async (req, res, next) => {
     next();
 };
 
-//isAdmin verify role === 0 
 
-const isAdmin = (req, res, next) => {
-    if (req.usuario && req.usuario.role === 0) {
+const isAdmin = async (req, res, next) => {
+    if (req.usuario && req.usuario.role === 0 ) {
         return next();
     }
     return res.status(401).json({ msg: "No autorizado" });
 };
 
 
-export { checkAuth };
+
+export { checkAuth, isAdmin };

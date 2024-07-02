@@ -6,14 +6,14 @@ import {
     deleteCustomsize
 } from '../controllers/customsizeController.js';
 import upload from '../helpers/uploadImage.js';
-import { checkAuth } from '../middleware/checkAuth.js';
+import { checkAuth, isAdmin } from '../middleware/checkAuth.js';
 
 
 const router = express.Router();
 
 router.get('/customsize', getCustomsize);
-router.get('/customsize/:id', checkAuth, getCustomsizeById);
-router.post('/customsize', checkAuth, upload.single('img'), createCustomsize);
-router.delete('/customsize/:id', checkAuth, deleteCustomsize);
+router.get('/customsize/:id', checkAuth, isAdmin, getCustomsizeById);
+router.post('/customsize', checkAuth, isAdmin, upload.single('img'), createCustomsize);
+router.delete('/customsize/:id', checkAuth, isAdmin, deleteCustomsize);
 
 export default router;
