@@ -20,7 +20,10 @@ const blogSchema = new mongoose.Schema({
     public_id: {
         type: String,
     },
-
+    isPublished: {
+        type: Boolean,
+        default: false,
+    },
 }, {
     timestamps: true,
 });

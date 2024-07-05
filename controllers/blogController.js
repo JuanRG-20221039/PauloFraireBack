@@ -13,6 +13,18 @@ const getBlogs = async (req, res) => {
     }
 }
 
+//get blosg isPublished
+
+const getBlogsPublished = async (req, res) => {
+    try {
+        const blogs = await Blog.find({ isPublished: true });
+        res.status(200).json(blogs);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
 
 //get blog by id 
 const getBlogById = async (req, res) => {
@@ -85,12 +97,12 @@ const createBlog = async (req, res) => {
 
 const updateBlog = async (req, res) => {
     const { id } = req.params;
-    const { title, description, date } = req.body;
+    const { title, description, date, isPublished } = req.body;
 
-    console.log(title, description, date);
+    console.log(title, description, date, isPublished);
 
     try {
-        if (!title || !description || !date) {
+        if (!title || !description || !date || !isPublished) {
             const error = new Error('Por favor llene todos los campos');
             return res.status(400).json(error.message);
         }
@@ -119,6 +131,7 @@ const updateBlog = async (req, res) => {
         blog.title = title;
         blog.description = description;
         blog.date = date;
+        blog.isPublished = isPublished
 
         await blog.save();
 
@@ -159,6 +172,7 @@ const deleteBlog = async (req, res) => {
 
 export {
     getBlogs,
+    getBlogsPublished,
     getBlogById,
     createBlog,
     updateBlog,

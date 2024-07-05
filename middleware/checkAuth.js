@@ -32,10 +32,10 @@ const checkAuth = async (req, res, next) => {
 
 
 const isAdmin = async (req, res, next) => {
-    if (req.usuario && req.usuario.role === 0 ) {
+    if (req.usuario && req.usuario.role === 0) {
         return next();
     }
-    return res.status(401).json({ msg: "No autorizado" });
+    return res.status(401).json({ msg: "Acceso No Autorizado" });
 };
 
 
