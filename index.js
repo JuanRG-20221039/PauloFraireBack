@@ -10,6 +10,7 @@ import blogRoutes from './routes/blogRoutes.js';
 import customsizeRoutes from './routes/customsizeRoutes.js';
 import imageActivityRoutes from './routes/imageActivityRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
 
 const app = express();
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api', blogRoutes);
 app.use('/api', customsizeRoutes);
 app.use('/api', imageActivityRoutes);
 app.use('/api', userRoutes);
+app.use('/api', contactRoutes);
 
 
 const PORT = process.env.PORT || 5000;
