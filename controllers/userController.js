@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from 'bcrypt';
 import generateJWT from "../helpers/generateJWT.js";
+import axios from 'axios';
 
 const getUsers = async (req, res) => {
     try {
@@ -11,9 +12,8 @@ const getUsers = async (req, res) => {
     }
 }
 
-//get user by id
+// Get user by id
 const getUserById = async (req, res) => {
-
     const { id } = req.params;
     try {
         if (!id) {
@@ -29,40 +29,60 @@ const getUserById = async (req, res) => {
         }
 
         res.json(user);
-
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: error.message });
     }
 }
 
-//login
-
+// Login
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, captcha } = req.body;
 
     try {
-        if (!email || !password) {
-            const error = new Error('Todos los campos son necesarios');
-            return res.status(400).json(error.message);
+        if (!email || !password || !captcha) {
+            return res.status(400).json({ message: 'Todos los campos son necesarios' });
+        }
+
+        // Verificar el captcha
+        const secret = '6LeHymIqAAAAAJ5GOGt1moCOYemNgb-irkCCX6s4';
+        const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${secret}&response=${captcha}`);
+        if (!response.data.success) {
+            return res.status(400).json({ message: 'Captcha inválido' });
         }
 
         const user = await User.findOne({ email });
-
         if (!user) {
-            const error = new Error('Usuario no encontrado');
-            return res.status(400).json(error.message);
+            return res.status(400).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Comprobar si la cuenta está bloqueada
+        const currentTime = new Date();
+        if (user.lockUntil && user.lockUntil > currentTime) {
+            const remainingTime = Math.ceil((user.lockUntil - currentTime) / 1000 / 60); // en minutos
+            return res.status(403).json({ message: `Cuenta bloqueada. Intenta nuevamente en ${remainingTime} minutos.` });
         }
 
         const passwordMatch = await bcrypt.compare(password, user.password);
-
         if (!passwordMatch) {
-            const error = new Error('Contraseña incorrecta');
-            return res.status(400).json(error.message);
+            user.loginAttempts = (user.loginAttempts || 0) + 1;
+
+            // Si se alcanzan 3 intentos fallidos, bloquear la cuenta
+            if (user.loginAttempts >= 3) {
+                user.lockUntil = new Date(currentTime.getTime() + 10 * 60000); // Bloquear por 10 minutos
+                user.loginAttempts = 0; // Reseteamos el conteo de intentos
+            }
+
+            await user.save();
+            return res.status(400).json({ message: 'Contraseña incorrecta' });
         }
+
+        // Si el inicio de sesión es exitoso, reiniciar los intentos y el bloqueo
+        user.loginAttempts = 0;
+        user.lockUntil = null; // Desbloquear
+        await user.save();
+
         const token = generateJWT(user.id);
-
-
         const payload = {
             user: {
                 id: user.id,
@@ -73,7 +93,6 @@ const login = async (req, res) => {
             },
         };
 
-
         res.json(payload);
 
     } catch (error) {
@@ -82,15 +101,12 @@ const login = async (req, res) => {
     }
 }
 
-
-//create user
-
+// Create user
 const addUser = async (req, res) => {
-
     const { name, lastName, email, password, role } = req.body;
 
     try {
-        if (!name || !lastName || !email || !password || !role) {
+        if (!name || !lastName || !email || !password || role === undefined) {
             const error = new Error('Todos los campos son necesarios');
             return res.status(400).json(error.message);
         }
@@ -110,21 +126,17 @@ const addUser = async (req, res) => {
             role
         });
 
-
         user.password = await bcrypt.hashSync(password, 10);
-
         await user.save();
 
         res.json({ message: 'Usuario creado correctamente' });
-
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: error.message });
     }
 }
 
-//update user
-
+// Update user
 const updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, lastName, email, password } = req.body;
@@ -155,20 +167,16 @@ const updateUser = async (req, res) => {
         await user.save();
 
         res.json({ message: 'Usuario actualizado correctamente' });
-
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: error.message });
     }
 }
 
-
-//delete user 
-
+// Delete user 
 const deleteUser = async (req, res) => {
     const { id } = req.params;
     try {
-
         if (!id) {
             const error = new Error('ID requerido');
             return res.status(400).json(error.message);
@@ -184,7 +192,30 @@ const deleteUser = async (req, res) => {
         await User.findByIdAndDelete(id);
 
         res.json({ message: 'Usuario eliminado correctamente' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message });
+    }
+}
 
+// Get user by email
+const getUserByEmail = async (req, res) => {
+    const { email } = req.params;
+
+    try {
+        if (!email) {
+            const error = new Error('Email requerido');
+            return res.status(400).json(error.message);
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            const error = new Error('Usuario no encontrado');
+            return res.status(404).json(error.message);
+        }
+
+        res.json(user);
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: error.message });
@@ -194,6 +225,7 @@ const deleteUser = async (req, res) => {
 export {
     getUsers,
     getUserById,
+    getUserByEmail,
     addUser,
     updateUser,
     deleteUser,

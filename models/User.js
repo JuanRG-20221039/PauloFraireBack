@@ -20,6 +20,13 @@ const UserSchema = new mongoose.Schema({
     role: {
         type: Number,
         default: 0
+    },
+    loginAttempts: {
+        type: Number,
+        default: 0
+    },
+    lockUntil: {
+        type: Date
     }
 }, {
     timestamps: true
@@ -27,5 +34,4 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', UserSchema);
 
-export default User
-
+export default User;
