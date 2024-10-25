@@ -22,6 +22,10 @@ const TerminoSchema = new mongoose.Schema({
       },
     },
   ],
+  isActive: {
+    type: Boolean,
+    default: false, // Por defecto, los términos son inactivos
+  },
 });
 
 // Establecer versión inicial para nuevos términos

@@ -83,4 +83,42 @@ const deletePolitica = async (req, res) => {
   }
 };
 
-export { getPoliticas, addPolitica, editPolitica, deletePolitica };
+// Establecer una política como vigente
+const setPoliticaVigente = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Desactivar todas las políticas actuales
+    await Politica.updateMany({}, { isActive: false });
+
+    // Activar la política seleccionada
+    const politica = await Politica.findByIdAndUpdate(
+      id,
+      { isActive: true },
+      { new: true }
+    );
+
+    res.json(politica);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Obtener la política vigente
+const getPoliticaVigente = async (req, res) => {
+  try {
+    const politicaVigente = await Politica.findOne({ isActive: true });
+    res.json(politicaVigente);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export {
+  getPoliticas,
+  addPolitica,
+  editPolitica,
+  deletePolitica,
+  setPoliticaVigente,
+  getPoliticaVigente,
+};

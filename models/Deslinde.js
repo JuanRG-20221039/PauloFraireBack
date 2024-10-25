@@ -21,6 +21,10 @@ const DeslindeSchema = new mongoose.Schema({
       },
     },
   ],
+  isActive: {
+    type: Boolean,
+    default: false, // Nuevo campo para la política vigente
+  },
 });
 
 // Versión inicial

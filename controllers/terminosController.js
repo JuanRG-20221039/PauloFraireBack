@@ -81,5 +81,41 @@ const deleteTermino = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// Establecer un término como vigente
+const setTerminoVigente = async (req, res) => {
+  const { id } = req.params;
 
-export { getTerminos, addTermino, editTermino, deleteTermino };
+  try {
+    // Desactivar todos los términos actuales
+    await Termino.updateMany({}, { isActive: false });
+
+    // Activar el término seleccionado
+    const termino = await Termino.findByIdAndUpdate(
+      id,
+      { isActive: true },
+      { new: true }
+    );
+
+    res.json(termino);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Obtener el término vigente
+const getTerminoVigente = async (req, res) => {
+  try {
+    const terminoVigente = await Termino.findOne({ isActive: true });
+    res.json(terminoVigente);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export {
+  getTerminos,
+  addTermino,
+  editTermino,
+  deleteTermino,
+  setTerminoVigente,
+  getTerminoVigente,
+};

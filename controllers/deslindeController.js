@@ -81,5 +81,42 @@ const deleteDeslinde = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// Establecer un deslinde como vigente
+const setDeslindeVigente = async (req, res) => {
+  const { id } = req.params;
 
-export { getDeslindes, addDeslinde, editDeslinde, deleteDeslinde };
+  try {
+    // Desactivar todos los deslindes actuales
+    await Deslinde.updateMany({}, { isActive: false });
+
+    // Activar el deslinde seleccionado
+    const deslinde = await Deslinde.findByIdAndUpdate(
+      id,
+      { isActive: true },
+      { new: true }
+    );
+
+    res.json(deslinde);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Obtener el deslinde vigente
+const getDeslindeVigente = async (req, res) => {
+  try {
+    const deslindeVigente = await Deslinde.findOne({ isActive: true });
+    res.json(deslindeVigente);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export {
+  getDeslindes,
+  addDeslinde,
+  editDeslinde,
+  deleteDeslinde,
+  setDeslindeVigente,
+  getDeslindeVigente,
+};
