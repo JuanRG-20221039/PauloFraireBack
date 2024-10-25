@@ -14,7 +14,7 @@ import contactRoutes from "./routes/contactRoutes.js";
 import politicasRoutes from "./routes/politicasRoutes.js";
 import deslindeRoutes from "./routes/deslindeRoutes.js";
 import terminosRoutes from "./routes/terminosRoutes.js";
-
+import socialRoutes from "./routes/socialLinkRoutes.js";
 const app = express();
 dotenv.config();
 // withelist frontend url
@@ -55,6 +55,7 @@ app.use("/api", contactRoutes);
 app.use("/api", politicasRoutes);
 app.use("/api", deslindeRoutes);
 app.use("/api", terminosRoutes);
+app.use("/api", socialRoutes);
 //--------------------para la parte de aceca de----------------------------------------------------------------
 
 const PORT = 8000;
