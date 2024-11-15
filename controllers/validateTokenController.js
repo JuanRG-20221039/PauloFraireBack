@@ -4,6 +4,54 @@ import nodemailer from "nodemailer";
 
 const TOKEN_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutos
 
+// export const createValidateToken = async (req, res) => {
+//     const { email } = req.body;
+
+//     if (!email) {
+//         return res.status(400).json({ message: "Email is required" });
+//     }
+
+//     const token = crypto.randomInt(100000, 999999).toString();
+//     const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_TIME);
+
+//     try {
+//         // Limpiar tokens anteriores si existen
+//         await ValidateToken.deleteMany({ email });
+
+//         const newToken = new ValidateToken({
+//             email,
+//             token,
+//             expiresAt,
+//             isValid: true,
+//         });
+
+//         await newToken.save();
+
+//         const transporter = nodemailer.createTransport({
+//             host: 'smtp.ethereal.email',
+//             port: 587,
+//             auth: {
+//                 user: 'gerry.dickens61@ethereal.email',
+//                 pass: '2jA6MUFxhqR1cm1WWp',
+//             },
+//         });
+
+//         const mailOptions = {
+//             from: 'gerry.dickens61@ethereal.email',
+//             to: email,
+//             subject: 'Your Verification Code - Centro Regional de Educación Superior Paulo Freire',
+//             text: `Your verification code is: ${token}`,
+//         };
+
+//         await transporter.sendMail(mailOptions);
+
+//         res.status(201).json({ message: "Verification token created and sent" });
+//     } catch (error) {
+//         console.error("Error creating token:", error);
+//         res.status(500).json({ message: "Server error" });
+//     }
+// };
+
 export const createValidateToken = async (req, res) => {
     const { email } = req.body;
 
@@ -27,18 +75,19 @@ export const createValidateToken = async (req, res) => {
 
         await newToken.save();
 
+        // Configuración de Brevo SMTP
         const transporter = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            port: 587,
+            host: 'smtp-relay.brevo.com', // Servidor SMTP de Brevo
+            port: 587, // Puerto SMTP
             auth: {
-                user: 'gerry.dickens61@ethereal.email',
-                pass: '2jA6MUFxhqR1cm1WWp',
-            },
+                user: '7ffd98001@smtp-brevo.com', // Tu usuario SMTP
+                pass: '7bycx9DhUjW8E23H' // Tu contraseña maestra de Brevo
+            }
         });
 
         const mailOptions = {
-            from: 'gerry.dickens61@ethereal.email',
-            to: email,
+            from: '7ffd98001@smtp-brevo.com', // El remitente
+            to: email, // El correo del destinatario
             subject: 'Your Verification Code - Centro Regional de Educación Superior Paulo Freire',
             text: `Your verification code is: ${token}`,
         };
