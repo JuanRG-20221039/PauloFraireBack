@@ -11,9 +11,10 @@ import customsizeRoutes from "./routes/customsizeRoutes.js";
 import imageActivityRoutes from "./routes/imageActivityRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
-import politicasRoutes from "./routes/politicasRoutes.js";
-import deslindeRoutes from "./routes/deslindeRoutes.js";
-import terminosRoutes from "./routes/terminosRoutes.js";
+import validateTokenRoutes from "./routes/validateTokenRoutes.js"; // de main
+import politicasRoutes from "./routes/politicasRoutes.js"; // de marvin
+import deslindeRoutes from "./routes/deslindeRoutes.js"; // de marvin
+import terminosRoutes from "./routes/terminosRoutes.js"; // de marvin
 import socialRoutes from "./routes/socialLinkRoutes.js";
 import sloganRoutes from "./routes/sloganRoutes.js";
 import logoRoutes from "./routes/logoRoutes.js";
@@ -54,11 +55,11 @@ app.use("/api", customsizeRoutes);
 app.use("/api", imageActivityRoutes);
 app.use("/api", userRoutes);
 app.use("/api", contactRoutes);
+app.use("/api", validateTokenRoutes); // de main
 //--------------------para la parte de aceca de----------------------------------------------------------------
-app.use("/api", politicasRoutes);
-app.use("/api", deslindeRoutes);
-app.use("/api", terminosRoutes);
-app.use("/api", socialRoutes);
+app.use("/api", politicasRoutes); // de marvin
+app.use("/api", deslindeRoutes); // de marvin
+app.use("/api", terminosRoutes); // de marvin
 //--------------------para la parte de aceca de----------------------------------------------------------------
 //--------------------------------------------Para slogan, logo y tituto de la pagina--------------------------
 app.use("/api", sloganRoutes);
