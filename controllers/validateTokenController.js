@@ -1,23 +1,35 @@
-import ValidateToken from "../models/ValidateToken.js";
-import crypto from "crypto";
-import nodemailer from "nodemailer";
+import SibApiV3Sdk from 'sib-api-v3-sdk'; // Importar el SDK de Brevo
+import crypto from 'crypto';
+import ValidateToken from '../models/ValidateToken.js'; // Asegúrate de tener tu modelo de token validado
 
-const TOKEN_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutos
+// Usar una variable de entorno para la clave API (es más seguro)
+const BREVO_API_KEY ='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'; // Deberías usar variables de entorno para la clave API
 
+// Configuración de la API de Brevo (SendinBlue)
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = BREVO_API_KEY;
+
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+// Ruta para crear y enviar el código de verificación al correo
 export const createValidateToken = async (req, res) => {
     const { email } = req.body;
 
+    // Validar que se proporcione el correo
     if (!email) {
         return res.status(400).json({ message: "Email is required" });
     }
 
+    // Generar token y tiempo de expiración (5 minutos)
     const token = crypto.randomInt(100000, 999999).toString();
-    const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_TIME);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos de expiración
 
     try {
-        // Limpiar tokens anteriores si existen
+        // Limpiar tokens anteriores asociados al correo
         await ValidateToken.deleteMany({ email });
 
+        // Crear y guardar un nuevo token
         const newToken = new ValidateToken({
             email,
             token,
@@ -27,23 +39,21 @@ export const createValidateToken = async (req, res) => {
 
         await newToken.save();
 
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            port: 587,
-            auth: {
-                user: 'gerry.dickens61@ethereal.email',
-                pass: '2jA6MUFxhqR1cm1WWp',
-            },
-        });
-
-        const mailOptions = {
-            from: 'gerry.dickens61@ethereal.email',
-            to: email,
-            subject: 'Your Verification Code - Centro Regional de Educación Superior Paulo Freire',
-            text: `Your verification code is: ${token}`,
+        // Crear el correo a enviar
+        const sendSmtpEmail = {
+            sender: { email: "copomex65@gmail.com", name: "CRESPF" }, // Asegúrate de que este email esté verificado en Brevo
+            to: [{ email }], // El destinatario
+            subject: "Your Verification Code - CRESPF",
+            htmlContent: `
+                <p>Hello,</p>
+                <p>Your verification code is: <strong>${token}</strong></p>
+                <p>This code will expire in 5 minutes.</p>
+                <p>Thank you,<br>CRESPF</p>
+            `,
         };
 
-        await transporter.sendMail(mailOptions);
+        // Enviar el correo usando la API de Brevo
+        await apiInstance.sendTransacEmail(sendSmtpEmail);
 
         res.status(201).json({ message: "Verification token created and sent" });
     } catch (error) {
