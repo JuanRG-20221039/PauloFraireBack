@@ -15,6 +15,9 @@ import politicasRoutes from "./routes/politicasRoutes.js";
 import deslindeRoutes from "./routes/deslindeRoutes.js";
 import terminosRoutes from "./routes/terminosRoutes.js";
 import socialRoutes from "./routes/socialLinkRoutes.js";
+import sloganRoutes from "./routes/sloganRoutes.js";
+import logoRoutes from "./routes/logoRoutes.js";
+import headerTitleRoutes from "./routes/headerTitleRoutes.js";
 const app = express();
 dotenv.config();
 // withelist frontend url
@@ -57,6 +60,11 @@ app.use("/api", deslindeRoutes);
 app.use("/api", terminosRoutes);
 app.use("/api", socialRoutes);
 //--------------------para la parte de aceca de----------------------------------------------------------------
+//--------------------------------------------Para slogan, logo y tituto de la pagina--------------------------
+app.use("/api", sloganRoutes);
+app.use("/api", logoRoutes);
+app.use("/api", headerTitleRoutes);
+//--------------------------------------------Para slogan, logo y tituto de la pagina--------------------------
 
 const PORT = 8000;
 
