@@ -1,9 +1,11 @@
 import SibApiV3Sdk from 'sib-api-v3-sdk'; // Importar el SDK de Brevo
 import crypto from 'crypto';
 import ValidateToken from '../models/ValidateToken.js'; // Asegúrate de tener tu modelo de token validado
+import dotenv from "dotenv";
 
-// Usar una variable de entorno para la clave API (es más seguro)
-const BREVO_API_KEY ='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'; // Deberías usar variables de entorno para la clave API
+dotenv.config();
+
+const BREVO_API_KEY ='process.env.API_BREVO'; // Deberías usar variables de entorno para la clave API
 
 // Configuración de la API de Brevo (SendinBlue)
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
