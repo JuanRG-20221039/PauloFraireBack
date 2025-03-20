@@ -1,3 +1,4 @@
+//OfertaEducativa.js
 import mongoose from "mongoose";
 
 const PdfSchema = new mongoose.Schema({
