@@ -5,7 +5,6 @@ import express from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
 
-<<<<<<< HEAD
 import academyActivitiesRoutes from "./routes/academyActivitiesRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import customsizeRoutes from "./routes/customsizeRoutes.js";
@@ -24,16 +23,6 @@ import contextoContemporaneoRoutes from "./routes/contextoContemporaneoRoutes.js
 import ofertaEducativaRoutes from "./routes/ofertaEducativaRoutes.js";
 import pdfsCCRoutes from "./routes/pdfsCCRoutes.js";
 import becaRoutes from "./routes/becaRoutes.js"; // Importar rutas de becas
-=======
-// import routes
-import academyActivitiesRoutes from './routes/academyActivitiesRoutes.js';
-import blogRoutes from './routes/blogRoutes.js';
-import customsizeRoutes from './routes/customsizeRoutes.js';
-import imageActivityRoutes from './routes/imageActivityRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import contactRoutes from './routes/contactRoutes.js';
-import validateTokenRoutes from "./routes/validateTokenRoutes.js";
->>>>>>> 07ecf49 (	new file:   .vscode/settings.json)
 
 const app = express();
 
@@ -60,7 +49,6 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-<<<<<<< HEAD
 // Rutas
 app.use("/api", academyActivitiesRoutes);
 app.use("/api", blogRoutes);
@@ -80,16 +68,6 @@ app.use("/api", contextoContemporaneoRoutes);
 app.use("/api", pdfsCCRoutes);
 app.use("/api", ofertaEducativaRoutes);
 app.use("/api", becaRoutes);
-=======
-//Routes
-app.use('/api', academyActivitiesRoutes);
-app.use('/api', blogRoutes);
-app.use('/api', customsizeRoutes);
-app.use('/api', imageActivityRoutes);
-app.use('/api', userRoutes);
-app.use('/api', contactRoutes);
-app.use('/api', validateTokenRoutes);
->>>>>>> 07ecf49 (	new file:   .vscode/settings.json)
 
 app.get("/api/error500", (req, res) => {
   res.status(500).send("Internal Server Error");
