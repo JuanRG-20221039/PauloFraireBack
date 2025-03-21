@@ -31,7 +31,7 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const whitelist = "http://localhost:5173";
+const whitelist = ["http://localhost:5173", "https://paulofrairefront.onrender.com"];
 
 const corsOptions = {
   origin: function (origin, callback) {
