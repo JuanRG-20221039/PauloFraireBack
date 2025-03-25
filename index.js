@@ -31,8 +31,7 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const whitelist = ["http://localhost:5173", "https://paulofrairefront.onrender.com", "https://paulo-fraire-front-n123dslw5-juanrgs-projects.vercel.app"];
-
+const whitelist = ["http://localhost:5173", "https://paulofrairefront.onrender.com", "https://paulofrairefront-production.up.railway.app"];
 const corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.includes(origin)) {
