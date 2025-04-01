@@ -10,32 +10,25 @@ import {
     updateUserByEmail,
     isPasswordInHistory 
 } from '../controllers/userController.js';
+import { checkAuth, isAdmin } from '../middleware/checkAuth.js';
 
 const router = express.Router();
 
-router.get('/user', getUsers);
+// Rutas GET protegidas con autenticación
+router.get('/user', checkAuth, isAdmin, getUsers);
 router.get('/user/:id', getUserById);
 router.get('/user/email/:email', getUserByEmail);
-router.post('/user', addUser);
+
+// Rutas POST protegidas con autenticación (excepto login)
+router.post('/user', checkAuth, isAdmin, addUser);
 router.post('/login', login);
-router.put('/user/:id', updateUser);
-router.delete('/user/:id', deleteUser);
+router.post('/user/password-history', checkAuth, isPasswordInHistory);
+
+// Rutas PUT protegidas con autenticación
+router.put('/user/:id', checkAuth, updateUser);
 router.put('/user/email/:email', updateUserByEmail);
 
-// Ruta para verificar si la contraseña ya existe en el historial
-router.post('/user/password-history', async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        const exists = await isPasswordInHistory(email, password);
-        if (exists) {
-            return res.status(400).json({ message: 'La contraseña ya ha sido utilizada anteriormente.' });
-        } else {
-            return res.status(200).json({ message: 'La contraseña es nueva.' });
-        }
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
-});
+// Ruta DELETE protegida con autenticación y permiso de administrador
+router.delete('/user/:id', checkAuth, isAdmin, deleteUser);
 
 export default router;

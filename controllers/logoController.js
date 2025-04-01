@@ -88,7 +88,7 @@ export const getLogo = async (req, res) => {
   try {
     const logo = await Logo.findOne();
     if (!logo) {
-      return res.status(404).json({ error: "No hay logo registrado" });
+      return ("");
     }
     res.status(200).json({ url: logo.url });
   } catch (error) {

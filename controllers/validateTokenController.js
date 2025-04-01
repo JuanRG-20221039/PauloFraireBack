@@ -1,11 +1,15 @@
-import SibApiV3Sdk from 'sib-api-v3-sdk'; // Importar el SDK de Brevo
-import crypto from 'crypto';
-import ValidateToken from '../models/ValidateToken.js'; // Asegúrate de tener tu modelo de token validado
-import dotenv from "dotenv";
-
+import dotenv from 'dotenv';
 dotenv.config();
 
-const BREVO_API_KEY ='process.env.API_BREVO'; // Deberías usar variables de entorno para la clave API
+import SibApiV3Sdk from 'sib-api-v3-sdk';
+import crypto from 'crypto';
+import ValidateToken from '../models/ValidateToken.js';
+
+// Usar la variable de entorno para la clave API
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+if (!BREVO_API_KEY) {
+    throw new Error('La variable de entorno BREVO_API_KEY no está definida');
+}
 
 // Configuración de la API de Brevo (SendinBlue)
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
@@ -18,7 +22,6 @@ const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 export const createValidateToken = async (req, res) => {
     const { email } = req.body;
 
-    // Validar que se proporcione el correo
     if (!email) {
         return res.status(400).json({ message: "Email is required" });
     }
@@ -43,8 +46,8 @@ export const createValidateToken = async (req, res) => {
 
         // Crear el correo a enviar
         const sendSmtpEmail = {
-            sender: { email: "copomex65@gmail.com", name: "CRESPF" }, // Asegúrate de que este email esté verificado en Brevo
-            to: [{ email }], // El destinatario
+            sender: { email: "copomex65@gmail.com", name: "CRESPF" },
+            to: [{ email }],
             subject: "Your Verification Code - CRESPF",
             htmlContent: `
                 <p>Hello,</p>
@@ -84,7 +87,7 @@ export const verifyValidateToken = async (req, res) => {
             return res.status(400).json({ message: "Invalid token" });
         }
 
-        tokenDoc.isValid = false; // Marcar como utilizado
+        tokenDoc.isValid = false;
         await tokenDoc.save();
 
         res.status(200).json({ message: "Token verified successfully" });
@@ -110,14 +113,13 @@ export const deleteValidateToken = async (req, res) => {
     }
 };
 
-// Función para eliminar todos los tokens relacionados con un correo
 export const deleteTokensByEmail = async (req, res) => {
     const { email } = req.body;
     
     try {
-      await ValidateToken.deleteMany({ email }); // Eliminar todos los tokens relacionados al correo
-    return res.status(200).json({ message: 'Tokens eliminados correctamente.' });
+        await ValidateToken.deleteMany({ email });
+        return res.status(200).json({ message: 'Tokens eliminados correctamente.' });
     } catch (error) {
-    return res.status(500).json({ message: 'Error al eliminar tokens', error });
+        return res.status(500).json({ message: 'Error al eliminar tokens', error });
     }
-};  
+};

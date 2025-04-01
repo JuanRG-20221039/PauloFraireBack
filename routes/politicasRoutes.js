@@ -1,4 +1,4 @@
-//routes politicasRoutes.js
+// routes/politicasRoutes.js
 import express from "express";
 import {
   getPoliticas,
@@ -8,14 +8,15 @@ import {
   setPoliticaVigente,
   getPoliticaVigente,
 } from "../controllers/politicasController.js";
+import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
 
 const router = express.Router();
 
 router.get("/politicas", getPoliticas);
-router.post("/politicas", addPolitica);
-router.put("/politicas/:id", editPolitica); // Nueva ruta para editar
-router.delete("/politicas/:id", deletePolitica); // Nueva ruta para eliminar
-router.put("/politicas/vigente/:id", setPoliticaVigente);
+router.post("/politicas", checkAuth, isAdmin, addPolitica);
+router.put("/politicas/:id", checkAuth, isAdmin, editPolitica);
+router.delete("/politicas/:id", checkAuth, isAdmin, deletePolitica);
+router.put("/politicas/vigente/:id", checkAuth, isAdmin, setPoliticaVigente);
 router.get("/politicas/vigente", getPoliticaVigente);
 
 export default router;

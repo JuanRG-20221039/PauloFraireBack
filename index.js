@@ -31,17 +31,16 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const whitelist = "http://localhost:5173";
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Error de Cors"));
-    }
-  },
-};
+// const whitelist = ["http://localhost:5173", "https://paulofrairefront.onrender.com", "https://paulofrairefront-production.up.railway.app"];
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (whitelist.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Error de Cors"));
+//     }
+//   },
+// };
 
 app.use(cors());
 
