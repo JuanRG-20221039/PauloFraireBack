@@ -22,7 +22,8 @@ import headerTitleRoutes from "./routes/headerTitleRoutes.js";
 import contextoContemporaneoRoutes from "./routes/contextoContemporaneoRoutes.js";
 import ofertaEducativaRoutes from "./routes/ofertaEducativaRoutes.js";
 import pdfsCCRoutes from "./routes/pdfsCCRoutes.js";
-import becaRoutes from "./routes/becaRoutes.js"; // Importar rutas de becas
+import becaRoutes from "./routes/becaRoutes.js";
+import notifyRoutes from "./routes/notifyRoutes.js"; // Importar rutas de notificaciones
 
 const app = express();
 
@@ -67,6 +68,7 @@ app.use("/api", contextoContemporaneoRoutes);
 app.use("/api", pdfsCCRoutes);
 app.use("/api", ofertaEducativaRoutes);
 app.use("/api", becaRoutes);
+app.use("/api", notifyRoutes);
 
 app.get("/api/error500", (req, res) => {
   res.status(500).send("Internal Server Error");
