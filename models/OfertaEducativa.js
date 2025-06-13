@@ -11,6 +11,8 @@ const EducationalOfferSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     pdfs: [PdfSchema], // PDFs embebidos
+    maxCapacity: { type: Number, required: true, default: 30 }, // Cupo máximo de alumnos
+    enrolledStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // IDs de alumnos inscritos
   },
   { timestamps: true }
 );

@@ -5,7 +5,7 @@ import cloudinary from "../utils/cloudinary.js";
 //---------------------------------------------------------------funcional
 export const createEducationalOffer = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, maxCapacity } = req.body;
 
     // Validar que se haya subido una imagen
     if (!req.files || !req.files.image) {
@@ -70,6 +70,7 @@ export const createEducationalOffer = async (req, res) => {
       imageUrl: imageResult.secure_url, // URL de la imagen
       title,
       description,
+      maxCapacity: maxCapacity || 30,
       pdfs: pdfResults.map((result) => ({
         url: result.url, // URL del PDF
         name: result.name, // Nombre original del PDF
@@ -98,7 +99,7 @@ export const getEducationalOffers = async (req, res) => {
 export const updateEducationalOffer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description } = req.body;
+    const { title, description, maxCapacity } = req.body;
 
     // Buscar la oferta en la base de datos
     const offer = await EducationalOffer.findById(id);
@@ -185,6 +186,7 @@ export const updateEducationalOffer = async (req, res) => {
     // Actualizar los datos de la oferta
     offer.title = title || offer.title;
     offer.description = description || offer.description;
+    offer.maxCapacity = maxCapacity || offer.maxCapacity;
 
     await offer.save();
 
