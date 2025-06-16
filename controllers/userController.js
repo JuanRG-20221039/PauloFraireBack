@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import bcrypt from 'bcrypt';
 import generateJWT from "../helpers/generateJWT.js";
 import axios from 'axios';
+import cloudinary from "../utils/cloudinary.js";
 
 const getUsers = async (req, res) => {
     try {
@@ -307,6 +308,87 @@ const isPasswordInHistory = async (email, password) => {
     }
 };
 
+// Helper para subir archivos a Cloudinary desde el buffer
+const uploadFileFromBuffer = (file, options) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.v2.uploader.upload_stream(options, (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    }).end(file.buffer);
+  });
+};
+
+// Subir documentos del aspirante
+const uploadUserDocs = async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const files = req.files?.docs;
+  
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: 'No se proporcionaron archivos.' });
+      }
+      
+      // Array para almacenar los documentos después de subirlos a Cloudinary
+      const docsArray = [];
+      
+      // Subir cada archivo a Cloudinary
+      for (const file of files) {
+        const result = await uploadFileFromBuffer(file, {
+          folder: `aspirantes/${userId}/docs`,
+          resource_type: 'auto'
+        });
+        
+        docsArray.push({
+          name: file.originalname,
+          url: result.secure_url,
+          type: file.mimetype,
+          uploadDate: new Date()
+        });
+      }
+  
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $push: { docsAspirante: { $each: docsArray } } },
+        { new: true, runValidators: true }
+      );
+  
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Usuario no encontrado.' });
+      }
+  
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Error en uploadUserDocs:', error);
+      res.status(500).json({ message: 'Error interno del servidor', error: error.message });
+    }
+  };
+
+// Actualizar estado de aprobación de documentos
+const updateDocsStatus = async (req, res) => {
+    const { id } = req.params;
+    const { docsStatus } = req.body;
+    
+    try {
+        // Verificar que el usuario exista
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Actualizar el estado de los documentos
+        user.docsStatus = docsStatus;
+        await user.save();
+
+        res.status(200).json({ 
+            message: 'Estado de documentos actualizado correctamente',
+            docsStatus: user.docsStatus
+        });
+    } catch (error) {
+        console.error('Error al actualizar estado de documentos:', error);
+        res.status(500).json({ message: 'Error al actualizar estado de documentos' });
+    }
+};
+
 export {
     getUsers,
     getUserById,
@@ -316,5 +398,7 @@ export {
     deleteUser,
     login,
     updateUserByEmail,
-    isPasswordInHistory
+    isPasswordInHistory,
+    uploadUserDocs,
+    updateDocsStatus
 }
