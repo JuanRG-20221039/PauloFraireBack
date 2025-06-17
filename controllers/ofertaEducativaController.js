@@ -1,5 +1,6 @@
 //controllers/ofertaEducativaController.js
 import EducationalOffer from "../models/OfertaEducativa.js";
+import User from "../models/User.js";
 import cloudinary from "../utils/cloudinary.js";
 
 //---------------------------------------------------------------funcional
@@ -251,5 +252,137 @@ export const getEducationalOfferById = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Error al obtener la oferta educativa" });
+  }
+};
+
+// Inscribir un usuario a una oferta educativa
+export const enrollUserInOffer = async (req, res) => {
+  try {
+    const { offerId } = req.params;
+    const userId = req.usuario._id; // Obtener el ID del usuario autenticado
+
+    // Verificar que la oferta educativa exista
+    const offer = await EducationalOffer.findById(offerId);
+    if (!offer) {
+      return res.status(404).json({ message: "Oferta educativa no encontrada" });
+    }
+
+    // Verificar que haya cupos disponibles
+    if (offer.enrolledStudents.length >= offer.maxCapacity) {
+      return res.status(400).json({ message: "No hay cupos disponibles en esta oferta educativa" });
+    }
+
+    // Verificar que el usuario exista
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Verificar si el usuario ya está inscrito en esta oferta
+    if (offer.enrolledStudents.includes(userId)) {
+      return res.status(400).json({ message: "El usuario ya está inscrito en esta oferta educativa" });
+    }
+
+    // Si el usuario ya tiene una oferta educativa seleccionada, desinscribirlo
+    if (user.selectedEducationalOffer) {
+      const previousOffer = await EducationalOffer.findById(user.selectedEducationalOffer);
+      if (previousOffer) {
+        // Eliminar al usuario de la lista de inscritos de la oferta anterior
+        previousOffer.enrolledStudents = previousOffer.enrolledStudents.filter(
+          (studentId) => studentId.toString() !== userId.toString()
+        );
+        await previousOffer.save();
+      }
+    }
+
+    // Inscribir al usuario en la nueva oferta
+    offer.enrolledStudents.push(userId);
+    await offer.save();
+
+    // Actualizar la oferta seleccionada en el perfil del usuario
+    user.selectedEducationalOffer = offerId;
+    await user.save();
+
+    res.status(200).json({
+      message: "Usuario inscrito correctamente en la oferta educativa",
+      offer,
+      user: {
+        _id: user._id,
+        name: user.name,
+        lastName: user.lastName,
+        email: user.email,
+        selectedEducationalOffer: user.selectedEducationalOffer
+      }
+    });
+  } catch (error) {
+    console.error("Error al inscribir usuario en oferta educativa:", error);
+    res.status(500).json({ message: "Error al inscribir usuario en oferta educativa" });
+  }
+};
+
+// Desinscribir un usuario de una oferta educativa
+export const unenrollUserFromOffer = async (req, res) => {
+  try {
+    const { offerId } = req.params;
+    const userId = req.usuario._id; // Obtener el ID del usuario autenticado
+
+    // Verificar que la oferta educativa exista
+    const offer = await EducationalOffer.findById(offerId);
+    if (!offer) {
+      return res.status(404).json({ message: "Oferta educativa no encontrada" });
+    }
+
+    // Verificar que el usuario exista
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Verificar si el usuario está inscrito en esta oferta
+    if (!offer.enrolledStudents.includes(userId)) {
+      return res.status(400).json({ message: "El usuario no está inscrito en esta oferta educativa" });
+    }
+
+    // Eliminar al usuario de la lista de inscritos
+    offer.enrolledStudents = offer.enrolledStudents.filter(
+      (studentId) => studentId.toString() !== userId.toString()
+    );
+    await offer.save();
+
+    // Actualizar el perfil del usuario
+    if (user.selectedEducationalOffer && user.selectedEducationalOffer.toString() === offerId) {
+      user.selectedEducationalOffer = null;
+      await user.save();
+    }
+
+    res.status(200).json({
+      message: "Usuario desinscrito correctamente de la oferta educativa",
+      offer
+    });
+  } catch (error) {
+    console.error("Error al desinscribir usuario de oferta educativa:", error);
+    res.status(500).json({ message: "Error al desinscribir usuario de oferta educativa" });
+  }
+};
+
+// Obtener ofertas educativas disponibles (con cupos)
+export const getAvailableEducationalOffers = async (req, res) => {
+  try {
+    const offers = await EducationalOffer.find();
+    
+    // Filtrar y añadir información de disponibilidad
+    const availableOffers = offers.map(offer => {
+      const availableSpots = offer.maxCapacity - offer.enrolledStudents.length;
+      return {
+        ...offer.toObject(),
+        availableSpots,
+        isFull: availableSpots <= 0
+      };
+    });
+
+    res.status(200).json(availableOffers);
+  } catch (error) {
+    console.error("Error al obtener ofertas educativas disponibles:", error);
+    res.status(500).json({ message: "Error al obtener ofertas educativas disponibles" });
   }
 };

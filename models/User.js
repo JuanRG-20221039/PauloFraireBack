@@ -24,7 +24,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: Number,
-    required: true
+    required: true,
+    default: 0
   },
   loginAttempts: {
     type: Number,
@@ -32,6 +33,11 @@ const userSchema = new mongoose.Schema({
   },
   lockUntil: {
     type: Date,
+    default: null
+  },
+  selectedEducationalOffer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'EducationalOffer',
     default: null
   },
   docsAspirante: [
@@ -43,9 +49,9 @@ const userSchema = new mongoose.Schema({
     }
   ],
   docsStatus: {
-    type: String,
-    enum: ['pendiente', 'aprobado', 'rechazado'],
-    default: 'pendiente'
+    type: Number,
+    enum: [0, 1],  // 0: pendiente, 1: aprobado
+    default: 0
   }
 }, {
   timestamps: true

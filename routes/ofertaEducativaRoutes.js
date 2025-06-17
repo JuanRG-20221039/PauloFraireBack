@@ -6,6 +6,9 @@ import {
   getEducationalOfferById,
   updateEducationalOffer,
   deleteEducationalOffer,
+  enrollUserInOffer,
+  unenrollUserFromOffer,
+  getAvailableEducationalOffers
 } from "../controllers/ofertaEducativaController.js";
 import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
 
@@ -26,6 +29,9 @@ router.post(
 // Ruta para obtener todas las ofertas educativas
 router.get("/getoffter", getEducationalOffers);
 
+// Ruta para obtener ofertas educativas disponibles (con información de cupos)
+router.get("/available", getAvailableEducationalOffers);
+
 // Ruta para obtener una oferta educativa por su ID
 router.get("/getoffterid/:id", getEducationalOfferById);
 
@@ -43,5 +49,11 @@ router.put(
 
 // Ruta para eliminar una oferta educativa por su ID (protegida)
 router.delete("/offterdelete/:id", checkAuth, isAdmin, deleteEducationalOffer);
+
+// Ruta para inscribir un usuario en una oferta educativa
+router.post("/enroll/:offerId", checkAuth, enrollUserInOffer);
+
+// Ruta para desinscribir un usuario de una oferta educativa
+router.post("/unenroll/:offerId", checkAuth, unenrollUserFromOffer);
 
 export default router;

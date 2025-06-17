@@ -142,7 +142,7 @@ const addUser = async (req, res) => {
 // Update user
 const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { name, lastName, email, password } = req.body;
+    const { name, lastName, email, password, docsAspirante } = req.body;
 
     try {
         if (!id) {
@@ -174,10 +174,34 @@ const updateUser = async (req, res) => {
             }
             user.password = bcrypt.hashSync(password, 10);
         }
+        // Update docsAspirante if provided and user's docs are not approved
+        if (docsAspirante !== undefined && user.docsStatus !== 1) {
+            // Si se están eliminando documentos, primero eliminarlos de Cloudinary
+            const removedDocs = user.docsAspirante.filter(
+                (doc, index) => !docsAspirante.some((newDoc, newIndex) => index === newIndex)
+            );
+
+            // Eliminar documentos de Cloudinary
+            for (const doc of removedDocs) {
+                try {
+                    // Extraer el public_id del URL de Cloudinary
+                    const urlParts = doc.url.split('/');
+                    const publicId = `aspirantes/${user._id}/docs/${urlParts[urlParts.length - 1].split('.')[0]}`;
+                    
+                    await cloudinary.v2.uploader.destroy(publicId);
+                } catch (error) {
+                    console.error('Error al eliminar documento de Cloudinary:', error);
+                }
+            }
+
+            user.docsAspirante = docsAspirante;
+        } else if (docsAspirante !== undefined && user.docsStatus === 1) {
+            return res.status(400).json({ message: 'No se pueden modificar los documentos una vez aprobados' });
+        }
 
         await user.save();
 
-        res.json({ message: 'Usuario actualizado correctamente' });
+        res.json({ message: 'Usuario actualizado correctamente', user });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: error.message });
@@ -328,6 +352,20 @@ const uploadUserDocs = async (req, res) => {
         return res.status(400).json({ message: 'No se proporcionaron archivos.' });
       }
       
+      // Verificar que el usuario exista y tenga una oferta educativa seleccionada
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado.' });
+      }
+      
+      // Verificar que el usuario tenga una oferta educativa seleccionada
+      if (!user.selectedEducationalOffer) {
+        return res.status(400).json({ 
+          message: 'Debe seleccionar una oferta educativa antes de subir documentos.',
+          requiresEducationalOffer: true
+        });
+      }
+      
       // Array para almacenar los documentos después de subirlos a Cloudinary
       const docsArray = [];
       
@@ -361,7 +399,7 @@ const uploadUserDocs = async (req, res) => {
       console.error('Error en uploadUserDocs:', error);
       res.status(500).json({ message: 'Error interno del servidor', error: error.message });
     }
-  };
+};
 
 // Actualizar estado de aprobación de documentos
 const updateDocsStatus = async (req, res) => {

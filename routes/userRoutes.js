@@ -29,6 +29,7 @@ router.post('/user/password-history', checkAuth, isPasswordInHistory);
 
 // Rutas PUT protegidas con autenticación
 router.put('/user/:id', checkAuth, updateUser);
+router.put('/user/:id/docs', checkAuth, updateUser); // Ruta específica para actualizar documentos
 router.put('/user/email/:email', updateUserByEmail);
 router.put('/user/:id/docs-status', checkAuth, isAdmin, updateDocsStatus);
 
