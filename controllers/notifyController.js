@@ -54,7 +54,7 @@ const getNotificationById = async (req, res) => {
 
 // Crear nueva notificación
 const createNotification = async (req, res) => {
-    const { titulo, resumen, descripcion, horaEmision, tiempoExpiracion, tipo } = req.body;
+    const { titulo, resumen, descripcion, horaEmision, tiempoExpiracion, tipo, prioridad } = req.body;
     
     try {
         if (!titulo || !resumen || !descripcion || !horaEmision || !tiempoExpiracion || !tipo) {
@@ -76,6 +76,7 @@ const createNotification = async (req, res) => {
             horaEmision,
             tiempoExpiracion,
             tipo,
+            prioridad,
             estado: 'VIGENTE'
         });
         
@@ -90,7 +91,7 @@ const createNotification = async (req, res) => {
 // Actualizar notificación
 const updateNotification = async (req, res) => {
     const { id } = req.params;
-    const { titulo, resumen, descripcion, horaEmision, tiempoExpiracion, tipo, estado } = req.body;
+    const { titulo, resumen, descripcion, horaEmision, tiempoExpiracion, tipo, estado, prioridad } = req.body;
     
     try {
         if (!id) {
@@ -110,6 +111,7 @@ const updateNotification = async (req, res) => {
         notification.resumen = resumen || notification.resumen;
         notification.descripcion = descripcion || notification.descripcion;
         notification.tipo = tipo || notification.tipo;
+        notification.prioridad = prioridad || notification.prioridad;
         
         // Si se actualiza la hora de emisión o tiempo de expiración, validar formato
         if (horaEmision || tiempoExpiracion) {

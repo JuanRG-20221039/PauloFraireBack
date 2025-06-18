@@ -46,6 +46,11 @@ const notifySchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    prioridad: {
+        type: String,
+        enum: ['ALTA', 'BAJA'],
+        default: 'BAJA'
+    },
     fechaExpiracion: {
         type: Date
     }
