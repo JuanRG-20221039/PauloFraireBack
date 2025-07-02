@@ -31,7 +31,7 @@ const getUserById = async (req, res) => {
 
         res.json(user);
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         return res.status(500).json({ message: error.message });
     }
 }
@@ -40,47 +40,33 @@ const getUserById = async (req, res) => {
 const login = async (req, res) => {
     const { email, password, captcha } = req.body;
 
-    // console.log('[LOGIN] Datos recibidos:', { email, password, captcha });
-
     try {
         if (!email || !password || !captcha) {
-            // console.log('[LOGIN] Error: Faltan campos obligatorios');
             return res.status(400).json({ message: 'Todos los campos son necesarios' });
         }
 
         // Verificar el captcha
         const secret = '6LeHymIqAAAAAJ5GOGt1moCOYemNgb-irkCCX6s4';
         const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${secret}&response=${captcha}`);
-        // console.log('[LOGIN] Resultado captcha:', response.data);
         if (!response.data.success) {
-            // console.log('[LOGIN] Captcha inválido');
             return res.status(400).json({ message: 'Captcha inválido' });
         }
 
         const user = await User.findOne({ email });
         if (!user) {
-            // console.log('[LOGIN] Usuario no encontrado:', email);
             return res.status(400).json({ message: 'Usuario no encontrado' });
         }
-
-        // console.log('[LOGIN] Usuario encontrado:', user.email);
-        // console.log('[LOGIN] Contraseña recibida (limpia):', password.trim());
-        // console.log('[LOGIN] Hash contraseña en BD:', user.password);
 
         const passwordClean = password.trim();
         const passwordMatch = await bcrypt.compare(passwordClean, user.password);
 
-        // console.log('[LOGIN] Resultado comparación contraseña:', passwordMatch);
-
         if (!passwordMatch) {
             user.loginAttempts = (user.loginAttempts || 0) + 1;
-            // console.log('[LOGIN] Intentos de login fallidos:', user.loginAttempts);
 
             // Si se alcanzan 3 intentos fallidos, bloquear la cuenta
             if (user.loginAttempts >= 3) {
                 user.lockUntil = new Date(Date.now() + 10 * 60000); // Bloquear por 10 minutos
                 user.loginAttempts = 0;
-                // console.log('[LOGIN] Cuenta bloqueada hasta:', user.lockUntil);
             }
 
             await user.save();
@@ -103,12 +89,9 @@ const login = async (req, res) => {
             },
         };
 
-        // console.log('[LOGIN] Inicio de sesión exitoso para:', user.email);
-
         res.json(payload);
 
     } catch (error) {
-        // console.log('[LOGIN] Error:', error);
         return res.status(500).json({ message: error.message });
     }
 }
@@ -145,7 +128,7 @@ const addUser = async (req, res) => {
 
         res.json({ message: 'Usuario creado correctamente' });
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         return res.status(500).json({ message: error.message });
     }
 };
@@ -214,7 +197,7 @@ const updateUser = async (req, res) => {
 
         res.json({ message: 'Usuario actualizado correctamente', user });
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         return res.status(500).json({ message: error.message });
     }
 }
@@ -239,7 +222,7 @@ const deleteUser = async (req, res) => {
 
         res.json({ message: 'Usuario eliminado correctamente' });
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         return res.status(500).json({ message: error.message });
     }
 }
@@ -263,7 +246,7 @@ const getUserByEmail = async (req, res) => {
 
         res.json(user);
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         return res.status(500).json({ message: error.message });
     }
 }
@@ -313,7 +296,7 @@ const updateUserByEmail = async (req, res) => {
 
         res.json({ message: 'Usuario actualizado correctamente' });
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         return res.status(500).json({ message: error.message });
     }
 };
