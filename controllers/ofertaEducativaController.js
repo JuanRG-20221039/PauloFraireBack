@@ -96,27 +96,27 @@ export const getEducationalOffers = async (req, res) => {
     res.status(500).json({ error: "Error al obtener las ofertas educativas" });
   }
 };
+
 // Editar una oferta educativa-----------------------------------funcional
 export const updateEducationalOffer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, maxCapacity } = req.body;
+    const { title, description, maxCapacity, removePdfs } = req.body;
 
-    // Buscar la oferta en la base de datos
     const offer = await EducationalOffer.findById(id);
     if (!offer) {
       return res.status(404).json({ error: "Oferta educativa no encontrada" });
     }
 
-    // Manejo de imagen (opcional)
+    // Manejo de imagen
     if (req.files && req.files.image) {
-      // Eliminar imagen anterior de Cloudinary
-      const publicId = offer.imageUrl.split("/").pop().split(".")[0]; // Extraer el public_id
-      await cloudinary.v2.uploader.destroy(
-        `educational-offers/images/${publicId}`
-      );
+      const publicId = offer.imageUrl?.split("/").pop().split(".")[0];
+      if (publicId) {
+        await cloudinary.v2.uploader.destroy(
+          `educational-offers/images/${publicId}`
+        );
+      }
 
-      // Subir la nueva imagen a Cloudinary
       const imageFile = req.files.image[0];
       const imageResult = await new Promise((resolve, reject) => {
         cloudinary.v2.uploader
@@ -133,29 +133,29 @@ export const updateEducationalOffer = async (req, res) => {
       offer.imageUrl = imageResult.secure_url;
     }
 
-    // Manejo de PDFs (opcional)
-    if (req.files && req.files.pdfs) {
-      // Eliminar PDFs anteriores de Cloudinary
-      for (const pdf of offer.pdfs) {
-        const publicId = pdf.url.split("/").pop().split(".")[0]; // Extraer el public_id
-        await cloudinary.v2.uploader.destroy(
-          `educational-offers/pdfs/${publicId}`
-        );
-      }
+    // Manejo de eliminación de PDFs específicos (opcional)
+    if (removePdfs && Array.isArray(JSON.parse(removePdfs))) {
+      const toRemove = JSON.parse(removePdfs); // array de nombres o URLs
+      offer.pdfs = offer.pdfs.filter((pdf) => {
+        const shouldRemove = toRemove.includes(pdf.name) || toRemove.includes(pdf.url);
+        if (shouldRemove) {
+          const publicId = pdf.url.split("/").pop().split(".")[0];
+          cloudinary.v2.uploader.destroy(`educational-offers/pdfs/${publicId}`);
+        }
+        return !shouldRemove;
+      });
+    }
 
-      // Subir los nuevos PDFs
+    // Manejo de nuevos PDFs
+    if (req.files && req.files.pdfs) {
       const pdfFiles = req.files.pdfs;
       const pdfResults = await Promise.all(
         pdfFiles.map((file) => {
           if (!file.mimetype.includes("pdf")) {
-            throw new Error(
-              `El archivo ${file.originalname} no es un PDF válido`
-            );
+            throw new Error(`El archivo ${file.originalname} no es un PDF válido`);
           }
 
-          const decodedName = Buffer.from(file.originalname, "latin1").toString(
-            "utf8"
-          );
+          const decodedName = Buffer.from(file.originalname, "latin1").toString("utf8");
 
           return new Promise((resolve, reject) => {
             cloudinary.v2.uploader
@@ -178,19 +178,16 @@ export const updateEducationalOffer = async (req, res) => {
         })
       );
 
-      offer.pdfs = pdfResults.map((result) => ({
-        url: result.url,
-        name: result.name,
-      }));
+      // Agregar los nuevos PDFs al array existente
+      offer.pdfs.push(...pdfResults);
     }
 
-    // Actualizar los datos de la oferta
+    // Actualizar otros campos
     offer.title = title || offer.title;
     offer.description = description || offer.description;
     offer.maxCapacity = maxCapacity || offer.maxCapacity;
 
     await offer.save();
-
     res.status(200).json(offer);
   } catch (error) {
     console.error("Error al actualizar la oferta educativa:", error);
