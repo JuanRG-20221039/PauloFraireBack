@@ -136,7 +136,7 @@ const addUser = async (req, res) => {
 // Update user
 const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { name, lastName, email, password, docsAspirante } = req.body;
+    const { name, lastName, email, password, docsAspirante, role } = req.body;
 
     try {
         if (!id) {
@@ -159,6 +159,10 @@ const updateUser = async (req, res) => {
                 return res.status(400).json({ message: 'El correo electrónico ya está en uso' });
             }
             user.email = email;
+        }
+        // Actualizar el rol si se proporciona
+        if (role !== undefined) {
+            user.role = parseInt(role, 10);
         }
         if (password) {
             // Check if password is in history
