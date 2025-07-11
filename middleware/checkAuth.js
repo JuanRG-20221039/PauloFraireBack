@@ -37,8 +37,8 @@ const isAdmin = async (req, res, next) => {
         return res.status(401).json({ msg: "Usuario no autenticado" });
     }
 
-    // Cambiar la condición de acceso
-    if (req.usuario.role !== 1) { // En vez de 0, permitir rol 1 si es el admin
+    // Cambiar la condición de acceso para permitir roles 1 (admin) y 2 (editor)
+    if (req.usuario.role !== 1 && req.usuario.role !== 2) {
         return res.status(403).json({ msg: "Acceso No Autorizado" });
     }
 
