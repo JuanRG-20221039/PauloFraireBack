@@ -24,13 +24,29 @@ import ofertaEducativaRoutes from "./routes/ofertaEducativaRoutes.js";
 import pdfsCCRoutes from "./routes/pdfsCCRoutes.js";
 import becaRoutes from "./routes/becaRoutes.js";
 // import notifyRoutes from "./routes/notifyRoutes.js"; // Importar rutas de notificaciones
+import institucioonalRoutes from "./routes/institucionalRoutes.js";
 
 const app = express();
 
 connectDB();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+/* app.use(express.json());
+app.use(express.urlencoded({ extended: true })); */
+// 🛡️ Middleware condicional: evita interferencia con multer
+app.use((req, res, next) => {
+  const contentType = req.headers["content-type"] || "";
+  const isMultipart = contentType.startsWith("multipart/form-data");
+
+  if (isMultipart) {
+    // No aplicar express.json() ni urlencoded si es una subida de archivo
+    return next();
+  }
+
+  express.json()(req, res, (err) => {
+    if (err) return res.status(400).json({ error: "Error al parsear JSON" });
+    express.urlencoded({ extended: true })(req, res, next);
+  });
+});
 
 // const whitelist = ["http://localhost:5173", "https://paulofrairefront.onrender.com", "https://paulofrairefront-production.up.railway.app"];
 // const corsOptions = {
@@ -69,6 +85,7 @@ app.use("/api", pdfsCCRoutes);
 app.use("/api", ofertaEducativaRoutes);
 app.use("/api", becaRoutes);
 // app.use("/api", notifyRoutes);
+app.use("/api", institucioonalRoutes);
 
 app.get("/api/error500", (req, res) => {
   res.status(500).send("Internal Server Error");
