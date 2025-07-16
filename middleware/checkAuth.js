@@ -28,7 +28,7 @@ const checkAuth = async (req, res, next) => {
     }
 
     if (!token) {
-        return res.status(401).json({ msg: "Token no válido" });
+        return res.status(401).json({ msg: "Acceso denegado" });
     }
 };
 
