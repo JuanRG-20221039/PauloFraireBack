@@ -19,18 +19,18 @@ const router = express.Router();
 
 // Rutas GET protegidas con autenticación
 router.get("/user", checkAuth, isAdmin, getUsers);
-router.get("/user/:id", getUserById);
+router.get("/user/:id", checkAuth, isAdmin, getUserById);
 router.get("/user/email/:email", checkAuth, isAdmin, getUserByEmail);
 
 // Rutas POST protegidas con autenticación (excepto login)
 router.post("/user", checkAuth, isAdmin, addUser);
 router.post("/login", login);
-router.post("/user/password-history", checkAuth, isPasswordInHistory);
+router.post("/user/password-history", checkAuth, isAdmin, isPasswordInHistory);
 
 // Rutas PUT protegidas con autenticación
-router.put("/user/:id", checkAuth, updateUser);
-router.put("/user/:id/docs", checkAuth, updateUser); // Ruta específica para actualizar documentos
-router.put("/user/email/:email", updateUserByEmail);
+router.put("/user/:id", checkAuth, isAdmin, updateUser);
+router.put("/user/:id/docs", checkAuth, isAdmin, updateUser); // Ruta específica para actualizar documentos
+router.put("/user/email/:email", checkAuth, isAdmin, updateUserByEmail);
 router.put("/user/:id/docs-status", checkAuth, isAdmin, updateDocsStatus);
 
 // Ruta para subir documentos
