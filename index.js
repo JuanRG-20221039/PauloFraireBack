@@ -42,6 +42,7 @@ import contextoContemporaneoRoutes from "./routes/contextoContemporaneoRoutes.js
 import ofertaEducativaRoutes from "./routes/ofertaEducativaRoutes.js";
 import pdfsCCRoutes from "./routes/pdfsCCRoutes.js";
 import becaRoutes from "./routes/becaRoutes.js";
+import estudianteRoutes from "./routes/estudianteRoutes.js"; //se removera a futuro
 // import notifyRoutes from "./routes/notifyRoutes.js";
 
 app.use("/api", academyActivitiesRoutes);
@@ -62,6 +63,7 @@ app.use("/api", contextoContemporaneoRoutes);
 app.use("/api", pdfsCCRoutes);
 app.use("/api", ofertaEducativaRoutes);
 app.use("/api", becaRoutes);
+app.use("/api", estudianteRoutes);//se removera a futuro
 // app.use("/api", notifyRoutes);
 
 // Ruta raíz opcional (puedes eliminarla si no se usa)
