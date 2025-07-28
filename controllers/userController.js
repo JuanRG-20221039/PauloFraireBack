@@ -57,21 +57,16 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'Usuario no encontrado' });
         }
 
-        // Comprobar si la cuenta está bloqueada
-        const currentTime = new Date();
-        if (user.lockUntil && user.lockUntil > currentTime) {
-            const remainingTime = Math.ceil((user.lockUntil - currentTime) / 1000 / 60); // en minutos
-            return res.status(403).json({ message: `Cuenta bloqueada. Intenta nuevamente en ${remainingTime} minutos.` });
-        }
+        const passwordClean = password.trim();
+        const passwordMatch = await bcrypt.compare(passwordClean, user.password);
 
-        const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
             user.loginAttempts = (user.loginAttempts || 0) + 1;
 
             // Si se alcanzan 3 intentos fallidos, bloquear la cuenta
             if (user.loginAttempts >= 3) {
-                user.lockUntil = new Date(currentTime.getTime() + 10 * 60000); // Bloquear por 10 minutos
-                user.loginAttempts = 0; // Reseteamos el conteo de intentos
+                user.lockUntil = new Date(Date.now() + 10 * 60000); // Bloquear por 10 minutos
+                user.loginAttempts = 0;
             }
 
             await user.save();
@@ -80,7 +75,7 @@ const login = async (req, res) => {
 
         // Si el inicio de sesión es exitoso, reiniciar los intentos y el bloqueo
         user.loginAttempts = 0;
-        user.lockUntil = null; // Desbloquear
+        user.lockUntil = null;
         await user.save();
 
         const token = generateJWT(user.id);
@@ -97,7 +92,6 @@ const login = async (req, res) => {
         res.json(payload);
 
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: error.message });
     }
 }
@@ -142,7 +136,7 @@ const addUser = async (req, res) => {
 // Update user
 const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { name, lastName, email, password, docsAspirante } = req.body;
+    const { name, lastName, email, password, docsAspirante, role } = req.body;
 
     try {
         if (!id) {
@@ -165,6 +159,10 @@ const updateUser = async (req, res) => {
                 return res.status(400).json({ message: 'El correo electrónico ya está en uso' });
             }
             user.email = email;
+        }
+        // Actualizar el rol si se proporciona
+        if (role !== undefined) {
+            user.role = parseInt(role, 10);
         }
         if (password) {
             // Check if password is in history

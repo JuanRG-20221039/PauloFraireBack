@@ -23,13 +23,12 @@ const checkAuth = async (req, res, next) => {
 
             return next();
         } catch (error) {
-            // console.log("Error en checkAuth:", error);
             return res.status(401).json({ msg: "Token inválido o expirado" });
         }
     }
 
     if (!token) {
-        return res.status(401).json({ msg: "Token no válido" });
+        return res.status(401).json({ msg: "Acceso denegado" });
     }
 };
 
@@ -38,10 +37,8 @@ const isAdmin = async (req, res, next) => {
         return res.status(401).json({ msg: "Usuario no autenticado" });
     }
 
-    // console.log("Rol del usuario:", req.usuario.role);
-
-    // Cambiar la condición de acceso
-    if (req.usuario.role !== 1) { // En vez de 0, permitir rol 1 si es el admin
+    // Cambiar la condición de acceso para permitir roles 1 (admin) y 2 (editor)
+    if (req.usuario.role !== 1 && req.usuario.role !== 2) {
         return res.status(403).json({ msg: "Acceso No Autorizado" });
     }
 

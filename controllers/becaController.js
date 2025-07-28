@@ -8,7 +8,6 @@ export const createBeca = async (req, res) => {
   try {
     const { title, description, requisitos} = req.body;
     if (!req.files || !req.files.image) {
-      console.log("Archivos recibidos:", req.files);
       return res.status(400).json({ error: "Debes subir una imagen" });
     }
 

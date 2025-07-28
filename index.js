@@ -3,8 +3,43 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 
+// Convirtiendo __dirname en ESModules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Inicializar app y conexión DB
+const app = express();
+connectDB();
+
+// Middleware
+app.use(cors()); // Importante que vaya antes
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Servir archivos estáticos del build de React
+app.use(express.static(path.join(__dirname, "dist"))); // Asegúrate de que "dist" es tu carpeta de build
+
+//--------------
+app.use((req, res, next) => {
+  const contentType = req.headers["content-type"] || "";
+  const isMultipart = contentType.startsWith("multipart/form-data");
+
+  if (isMultipart) {
+    // No aplicar express.json() ni urlencoded si es una subida de archivo
+    return next();
+  }
+
+  express.json()(req, res, (err) => {
+    if (err) return res.status(400).json({ error: "Error al parsear JSON" });
+    express.urlencoded({ extended: true })(req, res, next);
+  });
+});
+//--------------
+// Rutas API
 import academyActivitiesRoutes from "./routes/academyActivitiesRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import customsizeRoutes from "./routes/customsizeRoutes.js";
@@ -23,48 +58,10 @@ import contextoContemporaneoRoutes from "./routes/contextoContemporaneoRoutes.js
 import ofertaEducativaRoutes from "./routes/ofertaEducativaRoutes.js";
 import pdfsCCRoutes from "./routes/pdfsCCRoutes.js";
 import becaRoutes from "./routes/becaRoutes.js";
+import estudianteRoutes from "./routes/estudianteRoutes.js"; //se removera a futuro
 // import notifyRoutes from "./routes/notifyRoutes.js"; // Importar rutas de notificaciones
 import institucioonalRoutes from "./routes/institucionalRoutes.js";
 import historiaCulturaRoutes from "./routes/historiaCulturaRoutes.js"; // Importar rutas de Historia y Cultura
-
-const app = express();
-
-connectDB();
-
-/* app.use(express.json());
-app.use(express.urlencoded({ extended: true })); */
-// 🛡️ Middleware condicional: evita interferencia con multer
-app.use((req, res, next) => {
-  const contentType = req.headers["content-type"] || "";
-  const isMultipart = contentType.startsWith("multipart/form-data");
-
-  if (isMultipart) {
-    // No aplicar express.json() ni urlencoded si es una subida de archivo
-    return next();
-  }
-
-  express.json()(req, res, (err) => {
-    if (err) return res.status(400).json({ error: "Error al parsear JSON" });
-    express.urlencoded({ extended: true })(req, res, next);
-  });
-});
-
-// const whitelist = ["http://localhost:5173", "https://paulofrairefront.onrender.com", "https://paulofrairefront-production.up.railway.app"];
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     if (whitelist.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Error de Cors"));
-//     }
-//   },
-// };
-
-app.use(cors());
-
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
 
 // Rutas
 app.use("/api", academyActivitiesRoutes);
@@ -85,20 +82,27 @@ app.use("/api", contextoContemporaneoRoutes);
 app.use("/api", pdfsCCRoutes);
 app.use("/api", ofertaEducativaRoutes);
 app.use("/api", becaRoutes);
+app.use("/api", estudianteRoutes); //se removera a futuro
 // app.use("/api", notifyRoutes);
 app.use("/api", institucioonalRoutes);
 app.use("/api", historiaCulturaRoutes);
 
-app.get("/api/error500", (req, res) => {
-  res.status(500).send("Internal Server Error");
+// Ruta raíz opcional (puedes eliminarla si no se usa)
+app.get("/", (req, res) => {
+  res.send("Hello World");
 });
 
-app.get("/api/error400", (req, res) => {
-  res.status(400).send("Server Error");
+// Catch-all para que React maneje cualquier ruta no encontrada (SPA)
+app.get("/*splat", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "dist", "index.html"), function (err) {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
 });
 
-const PORT = 8000;
-
-const servidor = app.listen(PORT, () => {
+// Iniciar servidor
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

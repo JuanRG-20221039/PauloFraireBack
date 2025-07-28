@@ -58,9 +58,6 @@ const createBlog = async (req, res) => {
     const { title, description, date } = req.body;
     let img = req.file;
 
-    console.log(title, description, date);
-
-    console.log(img);
     try {
         if (!title || !description || !date || !img) {
             const error = new Error('Por favor llene todos los campos');
@@ -98,8 +95,6 @@ const createBlog = async (req, res) => {
 const updateBlog = async (req, res) => {
     const { id } = req.params;
     const { title, description, date, isPublished } = req.body;
-
-    // console.log(title, description, date, isPublished);
 
     try {
         if (!title || !description || !date || !isPublished) {
