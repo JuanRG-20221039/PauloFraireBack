@@ -23,7 +23,7 @@ router.delete("/introduction", deleteIntroductionSINHISTORY);
 // CRUD de historias (otra página)
 router.post(
   "/stories",
-  upload.fields([{ name: "images", maxCount: 5 }]),
+  upload.fields([{ name: "images", maxCount: 10 }]),
   addStory
 );
 
@@ -31,7 +31,7 @@ router.get("/stories", getStories);
 
 router.put(
   "/stories/:storyId",
-  upload.fields([{ name: "images", maxCount: 5 }]),
+  upload.fields([{ name: "images", maxCount: 10 }]),
   updateStory
 );
 

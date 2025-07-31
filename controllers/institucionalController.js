@@ -1,15 +1,36 @@
 import Institucional from "../models/Institucional.js";
 import cloudinary from "../utils/cloudinary.js";
+import { PassThrough } from "stream";
 
-// Función para subir video en base64 a Cloudinary
-async function uploadVideoBase64(buffer, mimetype) {
-  const base64 = `data:${mimetype};base64,${buffer.toString("base64")}`;
+// Subir video usando stream
+async function uploadVideoStream(buffer, mimetype) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.v2.uploader.upload_stream(
+      {
+        resource_type: "video",
+        folder: "paulo_freire/videos",
+        use_filename: true,
+        unique_filename: false,
+        timeout: 300000, // 300 segundos (5 minutos)
+      },
+      (error, result) => {
+        if (error) {
+          if (error.http_code === 499) {
+            return reject(
+              new Error(
+                "Tiempo de espera agotado al subir el video a Cloudinary. Intenta con un archivo más pequeño o una conexión más rápida."
+              )
+            );
+          }
+          return reject(error);
+        }
+        resolve(result);
+      }
+    );
 
-  return await cloudinary.v2.uploader.upload(base64, {
-    resource_type: "video",
-    folder: "paulo_freire/videos",
-    use_filename: true,
-    unique_filename: false,
+    const bufferStream = new PassThrough();
+    bufferStream.end(buffer);
+    bufferStream.pipe(stream);
   });
 }
 
@@ -38,30 +59,47 @@ export const saveInstitucional = async (req, res) => {
       subtitulo4,
       contenido4,
       videoTitulo,
+      removeVideo, // Nuevo campo para eliminar video
     } = req.body;
 
     let cloudResult = null;
 
+    // Validar video al crear nuevo contenido
+    const existente = await Institucional.findOne();
+    if (!existente && !req.file) {
+      return res
+        .status(400)
+        .json({ error: "Debes incluir un video al crear contenido" });
+    }
+
     if (req.file) {
       const allowed = ["video/mp4", "video/webm", "video/x-matroska"];
       if (!allowed.includes(req.file.mimetype)) {
-        return res.status(400).json({ error: "Formato de video no permitido" });
+        return res
+          .status(400)
+          .json({
+            error: "Formato de video no permitido. Usa MP4, WebM o MKV.",
+          });
       }
 
       if (req.file.size > 30 * 1024 * 1024) {
-        return res.status(400).json({ error: "El archivo excede 30MB" });
+        return res.status(400).json({ error: "El archivo excede 30MB." });
       }
 
-      // Buscar contenido existente para eliminar video previo en Cloudinary
-      const existente = await Institucional.findOne();
+      // Eliminar video previo en Cloudinary si existe
       if (existente?.videoPublicId) {
         await cloudinary.v2.uploader.destroy(existente.videoPublicId, {
           resource_type: "video",
         });
       }
 
-      // Subir video en base64 para evitar timeout de streams
-      cloudResult = await uploadVideoBase64(req.file.buffer, req.file.mimetype);
+      // Subir video usando stream
+      cloudResult = await uploadVideoStream(req.file.buffer, req.file.mimetype);
+    } else if (removeVideo === "true" && existente?.videoPublicId) {
+      // Eliminar video actual si removeVideo es true
+      await cloudinary.v2.uploader.destroy(existente.videoPublicId, {
+        resource_type: "video",
+      });
     }
 
     const payload = {
@@ -75,11 +113,17 @@ export const saveInstitucional = async (req, res) => {
       subtitulo4,
       contenido4,
       videoTitulo: videoTitulo || cloudResult?.original_filename,
-      videoUrl: cloudResult?.secure_url,
-      videoPublicId: cloudResult?.public_id,
     };
 
-    const existente = await Institucional.findOne();
+    // Actualizar video solo si se subió uno nuevo o se eliminó el actual
+    if (cloudResult) {
+      payload.videoUrl = cloudResult.secure_url;
+      payload.videoPublicId = cloudResult.public_id;
+    } else if (removeVideo === "true") {
+      payload.videoUrl = null;
+      payload.videoPublicId = null;
+    }
+
     const data = existente
       ? await Institucional.findByIdAndUpdate(existente._id, payload, {
           new: true,
@@ -89,6 +133,9 @@ export const saveInstitucional = async (req, res) => {
     res.status(200).json({ message: "Guardado correctamente", data });
   } catch (error) {
     console.error("🔴 Error en saveInstitucional:", error);
+    if (error.message.includes("Tiempo de espera agotado al subir el video")) {
+      return res.status(500).json({ error: error.message });
+    }
     res.status(500).json({ error: "Error interno", details: error.message });
   }
 };

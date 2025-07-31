@@ -202,7 +202,7 @@ export const getStories = async (req, res) => {
 };
 
 // Editar una historia por ID interno (story._id)
-export const updateStory = async (req, res) => {
+export const updateStoryy = async (req, res) => {
   try {
     const { storyId } = req.params;
     const { title, author } = req.body;
@@ -276,7 +276,102 @@ export const updateStory = async (req, res) => {
     res.status(500).json({ msg: "Error al actualizar historia" });
   }
 };
+// Editar una historia por ID interno (story._id)
+export const updateStory = async (req, res) => {
+  try {
+    const { storyId } = req.params;
+    const { title, author, imagesToDelete } = req.body;
+    let { paragraphs } = req.body;
 
+    // Parsear paragraphs si es un string
+    if (typeof paragraphs === "string") {
+      try {
+        paragraphs = JSON.parse(paragraphs);
+      } catch {
+        paragraphs = [];
+      }
+    }
+
+    // Parsear imagesToDelete si es un string
+    let imagesToDeleteArray = [];
+    if (typeof imagesToDelete === "string") {
+      try {
+        imagesToDeleteArray = JSON.parse(imagesToDelete);
+      } catch {
+        imagesToDeleteArray = [];
+      }
+    } else if (Array.isArray(imagesToDelete)) {
+      imagesToDeleteArray = imagesToDelete;
+    }
+
+    const doc = await HistoryCulture.findOne();
+    if (!doc)
+      return res.status(404).json({ msg: "Documento base no encontrado" });
+
+    const index = doc.stories.findIndex(
+      (story) => story._id.toString() === storyId
+    );
+    if (index === -1)
+      return res.status(404).json({ msg: "Historia no encontrada" });
+
+    // 1️⃣ Eliminar imágenes especificadas en imagesToDelete
+    if (imagesToDeleteArray.length > 0) {
+      for (const imageUrl of imagesToDeleteArray) {
+        const publicId = extractPublicIdFromUrl(imageUrl);
+        if (publicId) {
+          console.log("Eliminando imagen de Cloudinary:", publicId); // Depuración
+          await cloudinary.v2.uploader.destroy(publicId, {
+            resource_type: "image",
+          });
+          // Remover la URL del array images
+          doc.stories[index].images = doc.stories[index].images.filter(
+            (img) => img !== imageUrl
+          );
+        } else {
+          console.warn("No se pudo extraer public_id de URL:", imageUrl);
+        }
+      }
+    }
+
+    // 2️⃣ Subir nuevas imágenes si se proporcionan
+    const newImages = req.files?.images || [];
+    if (newImages.length > 0) {
+      const uploadedImages = await Promise.all(
+        newImages.map(
+          (file) =>
+            new Promise((resolve, reject) => {
+              cloudinary.v2.uploader
+                .upload_stream(
+                  { folder: "historia-cultura/images", resource_type: "image" },
+                  (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result.secure_url);
+                  }
+                )
+                .end(file.buffer);
+            })
+        )
+      );
+      // Agregar nuevas imágenes al array existente
+      doc.stories[index].images = [
+        ...doc.stories[index].images,
+        ...uploadedImages,
+      ];
+    }
+
+    // 3️⃣ Actualizar campos textuales
+    if (title) doc.stories[index].title = title;
+    if (author) doc.stories[index].author = author;
+    if (paragraphs) doc.stories[index].paragraphs = paragraphs;
+
+    await doc.save();
+
+    res.status(200).json(doc.stories[index]);
+  } catch (error) {
+    console.error("Error al actualizar historia:", error);
+    res.status(500).json({ msg: "Error al actualizar historia" });
+  }
+};
 // Eliminar historia
 export const deleteStory = async (req, res) => {
   try {
