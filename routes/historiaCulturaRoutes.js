@@ -15,26 +15,35 @@ import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
 const router = express.Router();
 
 // Introducción (página general)
-router.post("/introduction", createIntroduction);
-router.get("/introduction", getIntroduction);
-router.put("/introduction", updateIntroduction);
-router.delete("/introduction", deleteIntroductionSINHISTORY);
+router.post("/introduction", checkAuth, isAdmin, createIntroduction);
+router.get("/introduction", checkAuth, isAdmin, getIntroduction);
+router.put("/introduction", checkAuth, isAdmin, updateIntroduction);
+router.delete(
+  "/introduction",
+  checkAuth,
+  isAdmin,
+  deleteIntroductionSINHISTORY
+);
 
 // CRUD de historias (otra página)
 router.post(
   "/stories",
+  checkAuth,
+  isAdmin,
   upload.fields([{ name: "images", maxCount: 10 }]),
   addStory
 );
 
-router.get("/stories", getStories);
+router.get("/stories", checkAuth, isAdmin, getStories);
 
 router.put(
   "/stories/:storyId",
+  checkAuth,
+  isAdmin,
   upload.fields([{ name: "images", maxCount: 10 }]),
   updateStory
 );
 
-router.delete("/stories/:storyId", /* checkAuth, isAdmin, */ deleteStory);
+router.delete("/stories/:storyId", checkAuth, isAdmin, deleteStory);
 
 export default router;

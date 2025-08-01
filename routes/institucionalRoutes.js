@@ -1,5 +1,6 @@
 import express from "express";
 import multer from "multer";
+import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
 import {
   getInstitucional,
   saveInstitucional,
@@ -13,9 +14,21 @@ const upload = multer({
   limits: { fileSize: 30 * 1024 * 1024 }, // 30 MB
 });
 
-router.get("/institucional", getInstitucional);
-router.post("/institucional", upload.single("video"), saveInstitucional);
-router.put("/institucional", upload.single("video"), saveInstitucional);
-router.delete("/institucional", deleteInstitucional);
+router.get("/institucional", checkAuth, isAdmin, getInstitucional);
+router.post(
+  "/institucional",
+  checkAuth,
+  isAdmin,
+  upload.single("video"),
+  saveInstitucional
+);
+router.put(
+  "/institucional",
+  checkAuth,
+  isAdmin,
+  upload.single("video"),
+  saveInstitucional
+);
+router.delete("/institucional", checkAuth, isAdmin, deleteInstitucional);
 
 export default router;
