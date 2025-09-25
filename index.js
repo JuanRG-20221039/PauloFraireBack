@@ -23,6 +23,22 @@ app.use(express.urlencoded({ extended: true }));
 // Servir archivos estáticos del build de React
 app.use(express.static(path.join(__dirname, "dist"))); // Asegúrate de que "dist" es tu carpeta de build
 
+//--------------
+app.use((req, res, next) => {
+  const contentType = req.headers["content-type"] || "";
+  const isMultipart = contentType.startsWith("multipart/form-data");
+
+  if (isMultipart) {
+    // No aplicar express.json() ni urlencoded si es una subida de archivo
+    return next();
+  }
+
+  express.json()(req, res, (err) => {
+    if (err) return res.status(400).json({ error: "Error al parsear JSON" });
+    express.urlencoded({ extended: true })(req, res, next);
+  });
+});
+//--------------
 // Rutas API
 import academyActivitiesRoutes from "./routes/academyActivitiesRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
@@ -43,8 +59,11 @@ import ofertaEducativaRoutes from "./routes/ofertaEducativaRoutes.js";
 import pdfsCCRoutes from "./routes/pdfsCCRoutes.js";
 import becaRoutes from "./routes/becaRoutes.js";
 import estudianteRoutes from "./routes/estudianteRoutes.js"; //se removera a futuro
-// import notifyRoutes from "./routes/notifyRoutes.js";
+// import notifyRoutes from "./routes/notifyRoutes.js"; // Importar rutas de notificaciones
+import institucioonalRoutes from "./routes/institucionalRoutes.js";
+import historiaCulturaRoutes from "./routes/historiaCulturaRoutes.js"; // Importar rutas de Historia y Cultura
 
+// Rutas
 app.use("/api", academyActivitiesRoutes);
 app.use("/api", blogRoutes);
 app.use("/api", customsizeRoutes);
@@ -63,8 +82,10 @@ app.use("/api", contextoContemporaneoRoutes);
 app.use("/api", pdfsCCRoutes);
 app.use("/api", ofertaEducativaRoutes);
 app.use("/api", becaRoutes);
-app.use("/api", estudianteRoutes);//se removera a futuro
+app.use("/api", estudianteRoutes); //se removera a futuro
 // app.use("/api", notifyRoutes);
+app.use("/api", institucioonalRoutes);
+app.use("/api", historiaCulturaRoutes);
 
 // Ruta raíz opcional (puedes eliminarla si no se usa)
 app.get("/", (req, res) => {
