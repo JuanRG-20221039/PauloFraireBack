@@ -58,8 +58,6 @@ import contextoContemporaneoRoutes from "./routes/contextoContemporaneoRoutes.js
 import ofertaEducativaRoutes from "./routes/ofertaEducativaRoutes.js";
 import pdfsCCRoutes from "./routes/pdfsCCRoutes.js";
 import becaRoutes from "./routes/becaRoutes.js";
-import estudianteRoutes from "./routes/estudianteRoutes.js"; //se removera a futuro
-// import notifyRoutes from "./routes/notifyRoutes.js"; // Importar rutas de notificaciones
 import institucioonalRoutes from "./routes/institucionalRoutes.js";
 import historiaCulturaRoutes from "./routes/historiaCulturaRoutes.js"; // Importar rutas de Historia y Cultura
 
@@ -82,8 +80,6 @@ app.use("/api", contextoContemporaneoRoutes);
 app.use("/api", pdfsCCRoutes);
 app.use("/api", ofertaEducativaRoutes);
 app.use("/api", becaRoutes);
-app.use("/api", estudianteRoutes); //se removera a futuro
-// app.use("/api", notifyRoutes);
 app.use("/api", institucioonalRoutes);
 app.use("/api", historiaCulturaRoutes);
 
