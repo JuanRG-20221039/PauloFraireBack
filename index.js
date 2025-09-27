@@ -23,7 +23,6 @@ app.use(express.urlencoded({ extended: true }));
 // Servir archivos estáticos del build de React
 app.use(express.static(path.join(__dirname, "dist"))); // Asegúrate de que "dist" es tu carpeta de build
 
-//--------------
 app.use((req, res, next) => {
   const contentType = req.headers["content-type"] || "";
   const isMultipart = contentType.startsWith("multipart/form-data");
@@ -38,7 +37,7 @@ app.use((req, res, next) => {
     express.urlencoded({ extended: true })(req, res, next);
   });
 });
-//--------------
+
 // Rutas API
 import academyActivitiesRoutes from "./routes/academyActivitiesRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
@@ -59,7 +58,8 @@ import ofertaEducativaRoutes from "./routes/ofertaEducativaRoutes.js";
 import pdfsCCRoutes from "./routes/pdfsCCRoutes.js";
 import becaRoutes from "./routes/becaRoutes.js";
 import institucioonalRoutes from "./routes/institucionalRoutes.js";
-import historiaCulturaRoutes from "./routes/historiaCulturaRoutes.js"; // Importar rutas de Historia y Cultura
+import historiaCulturaRoutes from "./routes/historiaCulturaRoutes.js";
+import eventoRoutes from "./routes/eventoRoutes.js";
 
 // Rutas
 app.use("/api", academyActivitiesRoutes);
@@ -82,6 +82,7 @@ app.use("/api", ofertaEducativaRoutes);
 app.use("/api", becaRoutes);
 app.use("/api", institucioonalRoutes);
 app.use("/api", historiaCulturaRoutes);
+app.use("/api", eventoRoutes);
 
 // Ruta raíz opcional (puedes eliminarla si no se usa)
 app.get("/", (req, res) => {
