@@ -16,7 +16,8 @@ const router = express.Router();
 router.get('/blog', getBlogs);
 router.get('/blog/published', getBlogsPublished);
 router.get('/blog/:id', getBlogById);
-router.post('/blog', checkAuth, upload.single('img'), createBlog);
+
+router.post('/blog', checkAuth,isAdmin, upload.single('img'), createBlog);
 router.put('/blog/:id', checkAuth, isAdmin, upload.single('img'), updateBlog);
 router.delete('/blog/:id', checkAuth, isAdmin, deleteBlog);
 

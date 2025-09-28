@@ -4,7 +4,7 @@ import {
   addOrUpdateHeaderTitle,
   deleteHeaderTitle,
 } from "../controllers/headerTitleController.js";
-import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
+import { checkAuth, noEditor } from "../middleware/checkAuth.js";
 
 const router = express.Router();
 
@@ -12,9 +12,9 @@ const router = express.Router();
 router.get("/header-title", getHeaderTitle);
 
 // Ruta para agregar o actualizar el título (protegida)
-router.put("/header-title", checkAuth, isAdmin, addOrUpdateHeaderTitle);
+router.put("/header-title", checkAuth, noEditor, addOrUpdateHeaderTitle);
 
 // Ruta para eliminar el título (protegida)
-router.delete("/header-title", checkAuth, isAdmin, deleteHeaderTitle);
+router.delete("/header-title", checkAuth, noEditor, deleteHeaderTitle);
 
 export default router;
