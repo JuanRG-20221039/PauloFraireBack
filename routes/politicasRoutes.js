@@ -8,15 +8,15 @@ import {
   setPoliticaVigente,
   getPoliticaVigente,
 } from "../controllers/politicasController.js";
-import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
+import { checkAuth, noEditor } from "../middleware/checkAuth.js";
 
 const router = express.Router();
 
 router.get("/politicas", getPoliticas);
-router.post("/politicas", checkAuth, isAdmin, addPolitica);
-router.put("/politicas/:id", checkAuth, isAdmin, editPolitica);
-router.delete("/politicas/:id", checkAuth, isAdmin, deletePolitica);
-router.put("/politicas/vigente/:id", checkAuth, isAdmin, setPoliticaVigente);
+router.post("/politicas", checkAuth, noEditor, addPolitica);
+router.put("/politicas/:id", checkAuth, noEditor, editPolitica);
+router.delete("/politicas/:id", checkAuth, noEditor, deletePolitica);
+router.put("/politicas/vigente/:id", checkAuth, noEditor, setPoliticaVigente);
 router.get("/politicas/vigente", getPoliticaVigente);
 
 export default router;

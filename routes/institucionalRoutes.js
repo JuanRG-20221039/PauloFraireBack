@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
+import { checkAuth, noEditor } from "../middleware/checkAuth.js";
 import {
   getInstitucional,
   saveInstitucional,
@@ -18,17 +18,17 @@ router.get("/institucional", getInstitucional);
 router.post(
   "/institucional",
   checkAuth,
-  isAdmin,
+  noEditor,
   upload.single("video"),
   saveInstitucional
 );
 router.put(
   "/institucional",
   checkAuth,
-  isAdmin,
+  noEditor,
   upload.single("video"),
   saveInstitucional
 );
-router.delete("/institucional", checkAuth, isAdmin, deleteInstitucional);
+router.delete("/institucional", checkAuth, noEditor, deleteInstitucional);
 
 export default router;
