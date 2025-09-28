@@ -14,6 +14,7 @@ const router = express.Router();
 router.get('/image-activity', getImagesActivity);
 router.get('/image-activity/:id_academy', getImageActivitiesById);
 router.get('/image-activity/:id', getImageActivityById);
+
 router.post('/image-activity', checkAuth, isAdmin, upload.single('image'), createImageActivity);
 router.delete('/image-activity/:id', checkAuth, isAdmin, deleteImageActivity);
 

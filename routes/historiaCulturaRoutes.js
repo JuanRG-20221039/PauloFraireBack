@@ -16,7 +16,7 @@ const router = express.Router();
 
 // Introducción (página general)
 router.post("/introduction", checkAuth, isAdmin, createIntroduction);
-router.get("/introduction", checkAuth, isAdmin, getIntroduction);
+router.get("/introduction", getIntroduction);
 router.put("/introduction", checkAuth, isAdmin, updateIntroduction);
 router.delete(
   "/introduction",
@@ -34,7 +34,7 @@ router.post(
   addStory
 );
 
-router.get("/stories", checkAuth, isAdmin, getStories);
+router.get("/stories", getStories);
 
 router.put(
   "/stories/:storyId",

@@ -14,7 +14,7 @@ const upload = multer({
   limits: { fileSize: 30 * 1024 * 1024 }, // 30 MB
 });
 
-router.get("/institucional", checkAuth, isAdmin, getInstitucional);
+router.get("/institucional", getInstitucional);
 router.post(
   "/institucional",
   checkAuth,

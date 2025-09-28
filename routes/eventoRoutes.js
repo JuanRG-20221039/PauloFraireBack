@@ -18,10 +18,10 @@ const router = express.Router();
    =============================== */
 
 // Obtener todos los eventos
-router.get("/getEventos", checkAuth, getEventos);
+router.get("/getEventos", getEventos);
 
 // Obtener un evento por ID
-router.get("/getEvento/:id", checkAuth, getEventoById);
+router.get("/getEvento/:id", getEventoById);
 
 /* ===============================
    🔒 Rutas de administración (Auth + Admin)
