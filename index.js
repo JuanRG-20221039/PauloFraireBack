@@ -61,6 +61,7 @@ import institucioonalRoutes from "./routes/institucionalRoutes.js";
 import historiaCulturaRoutes from "./routes/historiaCulturaRoutes.js";
 import eventoRoutes from "./routes/eventoRoutes.js";
 import badgeConfigRoutes from "./routes/badgeConfigRoutes.js";
+import userBadgeRoutes from "./routes/userBadgeRoutes.js";
 
 // Rutas
 app.use("/api", academyActivitiesRoutes);
@@ -85,6 +86,7 @@ app.use("/api", institucioonalRoutes);
 app.use("/api", historiaCulturaRoutes);
 app.use("/api", eventoRoutes);
 app.use("/api", badgeConfigRoutes);
+app.use("/api", userBadgeRoutes);
 
 // Ruta raíz opcional (puedes eliminarla si no se usa)
 app.get("/", (req, res) => {
