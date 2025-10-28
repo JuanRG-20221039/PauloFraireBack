@@ -60,6 +60,7 @@ import becaRoutes from "./routes/becaRoutes.js";
 import institucioonalRoutes from "./routes/institucionalRoutes.js";
 import historiaCulturaRoutes from "./routes/historiaCulturaRoutes.js";
 import eventoRoutes from "./routes/eventoRoutes.js";
+import badgeConfigRoutes from "./routes/badgeConfigRoutes.js";
 
 // Rutas
 app.use("/api", academyActivitiesRoutes);
@@ -83,6 +84,7 @@ app.use("/api", becaRoutes);
 app.use("/api", institucioonalRoutes);
 app.use("/api", historiaCulturaRoutes);
 app.use("/api", eventoRoutes);
+app.use("/api", badgeConfigRoutes);
 
 // Ruta raíz opcional (puedes eliminarla si no se usa)
 app.get("/", (req, res) => {
