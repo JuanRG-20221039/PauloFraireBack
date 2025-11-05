@@ -8,16 +8,28 @@ import {
   deleteStaff,
   reorderStaff,
 } from "../controllers/staffController.js";
-import { checkAuth } from "../middleware/checkAuth.js";
+import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
 import upload from "../utils/multerConfig.js";
 
 const router = express.Router();
 
 router.get("/getstaff", getStaff);
 router.get("/getstaff/:id", getStaffById);
-router.post("/staff", upload.single("photo"), createStaff);
-router.put("/:id", upload.single("photo"), updateStaff);
-router.delete("/:id", deleteStaff);
-router.put("/reorder/batch", reorderStaff); // Nueva ruta para reordenar
+router.post(
+  "/add-staff",
+  checkAuth,
+  isAdmin,
+  upload.single("photo"),
+  createStaff
+);
+router.put(
+  "/edit-staff/:id",
+  checkAuth,
+  isAdmin,
+  upload.single("photo"),
+  updateStaff
+);
+router.delete("/delete-staff/:id", checkAuth, isAdmin, deleteStaff);
+router.put("/reorder/batch", checkAuth, isAdmin, reorderStaff); // Nueva ruta para reordenar
 
 export default router;
