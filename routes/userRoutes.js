@@ -7,6 +7,7 @@ import {
   updateUser,
   deleteUser,
   login,
+  loginMovil,
   updateUserByEmail,
   isPasswordInHistory,
   uploadUserDocs,
