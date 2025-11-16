@@ -17,7 +17,8 @@ const upload = multer({
 router.get("/inscripciones-images", getInscripcionesImages);
 router.post(
   "/inscripciones-images",
-
+  checkAuth,
+  isAdmin,
   upload.fields([{ name: "images" }]),
   addInscripcionesImages
 );

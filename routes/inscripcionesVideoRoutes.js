@@ -17,6 +17,8 @@ const upload = multer({
 router.get("/inscripciones-video", getInscripcionesVideo);
 router.post(
   "/inscripciones-video",
+  checkAuth,
+  isAdmin,
   upload.single("video"),
   createInscripcionesVideo
 );
