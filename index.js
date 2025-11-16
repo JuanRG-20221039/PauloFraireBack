@@ -64,7 +64,8 @@ import institucioonalRoutes from "./routes/institucionalRoutes.js";
 import historiaCulturaRoutes from "./routes/historiaCulturaRoutes.js"; // Importar rutas de Historia y Cultura
 import staffRoutes from "./routes/staffRoutes.js"; // Importar rutas de Staff
 import zonasRoutes from "./routes/zonasRoutes.js"; // Importar rutas de Zonas
-import inscripcionesMediaRoutes from "./routes/inscripcionesMediaRoutes.js";
+import inscripcionesImagesRoutes from "./routes/inscripcionesImagesRoutes.js";
+import inscripcionesVideoRoutes from "./routes/inscripcionesVideoRoutes.js";
 
 // Rutas
 app.use("/api", academyActivitiesRoutes);
@@ -91,7 +92,8 @@ app.use("/api", institucioonalRoutes);
 app.use("/api", historiaCulturaRoutes);
 app.use("/api", staffRoutes);
 app.use("/api", zonasRoutes);
-app.use("/api", inscripcionesMediaRoutes);
+app.use("/api", inscripcionesImagesRoutes);
+app.use("/api", inscripcionesVideoRoutes);
 
 // Ruta raíz opcional (puedes eliminarla si no se usa)
 app.get("/", (req, res) => {
