@@ -4,7 +4,7 @@ import {
   updateSlogan,
   deleteSlogan,
 } from "../controllers/sloganController.js";
-import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
+import { checkAuth, noEditor } from "../middleware/checkAuth.js";
 
 const router = express.Router();
 
@@ -12,9 +12,9 @@ const router = express.Router();
 router.get("/slogan", getSlogan);
 
 // Ruta para agregar o actualizar el eslogan (protegida)
-router.put("/slogan", checkAuth, isAdmin, updateSlogan);
+router.put("/slogan", checkAuth, noEditor, updateSlogan);
 
 // Ruta para eliminar el eslogan (protegida)
-router.delete("/slogan", checkAuth, isAdmin, deleteSlogan);
+router.delete("/slogan", checkAuth, noEditor, deleteSlogan);
 
 export default router;

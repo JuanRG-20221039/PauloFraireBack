@@ -96,6 +96,59 @@ const login = async (req, res) => {
     }
 }
 
+// Login móvil (sin verificación de captcha)
+const loginMovil = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Todos los campos son necesarios' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'Usuario no encontrado' });
+        }
+
+        const passwordClean = password.trim();
+        const passwordMatch = await bcrypt.compare(passwordClean, user.password);
+
+        if (!passwordMatch) {
+            user.loginAttempts = (user.loginAttempts || 0) + 1;
+
+            // Si se alcanzan 3 intentos fallidos, bloquear la cuenta
+            if (user.loginAttempts >= 3) {
+                user.lockUntil = new Date(Date.now() + 10 * 60000); // Bloquear por 10 minutos
+                user.loginAttempts = 0;
+            }
+
+            await user.save();
+            return res.status(400).json({ message: 'Contraseña incorrecta' });
+        }
+
+        // Si el inicio de sesión es exitoso, reiniciar los intentos y el bloqueo
+        user.loginAttempts = 0;
+        user.lockUntil = null;
+        await user.save();
+
+        const token = generateJWT(user.id);
+        const payload = {
+            user: {
+                id: user.id,
+                name: `${user.name} ${user.lastName}`,
+                email: user.email,
+                token: token,
+                role: user.role,
+            },
+        };
+
+        res.json(payload);
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 // Create user
 const addUser = async (req, res) => {
     const { name, lastName, email, password, role } = req.body;
@@ -433,6 +486,7 @@ export {
     updateUser,
     deleteUser,
     login,
+    loginMovil,
     updateUserByEmail,
     isPasswordInHistory,
     uploadUserDocs,

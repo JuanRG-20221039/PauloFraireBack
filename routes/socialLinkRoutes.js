@@ -5,7 +5,7 @@ import {
   addOrUpdateSocialLinks,
   deleteSocialLink,
 } from "../controllers/socialLinkController.js";
-import { checkAuth, isAdmin } from "../middleware/checkAuth.js";
+import { checkAuth, noEditor } from "../middleware/checkAuth.js";
 
 const router = express.Router();
 
@@ -13,9 +13,9 @@ const router = express.Router();
 router.get("/social-links", getSocialLinks);
 
 // Ruta para agregar o actualizar enlaces de redes sociales (protegida)
-router.put("/social-links", checkAuth, isAdmin, addOrUpdateSocialLinks);
+router.put("/social-links", checkAuth, noEditor, addOrUpdateSocialLinks);
 
 // Ruta para eliminar un enlace de red social (protegida)
-router.delete("/social-links/:platform", checkAuth, isAdmin, deleteSocialLink);
+router.delete("/social-links/:platform", checkAuth, noEditor, deleteSocialLink);
 
 export default router;

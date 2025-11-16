@@ -45,5 +45,18 @@ const isAdmin = async (req, res, next) => {
     next();
 };
 
+const noEditor = async (req, res, next) => {
+    if (!req.usuario) {
+        return res.status(401).json({ msg: "Usuario no autenticado" });
+    }
 
-export { checkAuth, isAdmin };
+    // Cambiar la condición de acceso para permitir roles 1 (admin) y 2 (editor)
+    if (req.usuario.role !== 1) {
+        return res.status(403).json({ msg: "Acceso No Autorizado -- SOLO ADMINISTRADORES" });
+    }
+
+    next();
+};
+
+
+export { checkAuth, isAdmin, noEditor };
