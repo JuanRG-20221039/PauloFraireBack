@@ -7,30 +7,28 @@ import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 
-// Convirtiendo __dirname en ESModules
+// __dirname en ESModules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Inicializar app y conexión DB
+// Inicializar app y DB
 const app = express();
 connectDB();
 
 // Middleware
-app.use(cors()); // Importante que vaya antes
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos del build de React
-app.use(express.static(path.join(__dirname, "dist"))); // Asegúrate de que "dist" es tu carpeta de build
+// Archivos estáticos (React build)
+app.use(express.static(path.join(__dirname, "dist")));
 
+// Manejo especial para multipart/form-data
 app.use((req, res, next) => {
   const contentType = req.headers["content-type"] || "";
   const isMultipart = contentType.startsWith("multipart/form-data");
 
-  if (isMultipart) {
-    // No aplicar express.json() ni urlencoded si es una subida de archivo
-    return next();
-  }
+  if (isMultipart) return next();
 
   express.json()(req, res, (err) => {
     if (err) return res.status(400).json({ error: "Error al parsear JSON" });
@@ -38,7 +36,7 @@ app.use((req, res, next) => {
   });
 });
 
-// Rutas API
+// Importación de rutas
 import academyActivitiesRoutes from "./routes/academyActivitiesRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import customsizeRoutes from "./routes/customsizeRoutes.js";
@@ -59,9 +57,17 @@ import pdfsCCRoutes from "./routes/pdfsCCRoutes.js";
 import becaRoutes from "./routes/becaRoutes.js";
 import institucioonalRoutes from "./routes/institucionalRoutes.js";
 import historiaCulturaRoutes from "./routes/historiaCulturaRoutes.js";
+
+// Rutas propias de Marvinsh
+import staffRoutes from "./routes/staffRoutes.js";
+import zonasRoutes from "./routes/zonasRoutes.js";
+import inscripcionesImagesRoutes from "./routes/inscripcionesImagesRoutes.js";
+import inscripcionesVideoRoutes from "./routes/inscripcionesVideoRoutes.js";
+
+// Rutas añadidas en TEST-BACK
 import eventoRoutes from "./routes/eventoRoutes.js";
 
-// Rutas
+// Registrar rutas principales
 app.use("/api", academyActivitiesRoutes);
 app.use("/api", blogRoutes);
 app.use("/api", customsizeRoutes);
@@ -82,14 +88,22 @@ app.use("/api", ofertaEducativaRoutes);
 app.use("/api", becaRoutes);
 app.use("/api", institucioonalRoutes);
 app.use("/api", historiaCulturaRoutes);
+
+// Del branch Marvinsh
+app.use("/api", staffRoutes);
+app.use("/api", zonasRoutes);
+app.use("/api", inscripcionesImagesRoutes);
+app.use("/api", inscripcionesVideoRoutes);
+
+// Del branch TEST-BACK
 app.use("/api", eventoRoutes);
 
-// Ruta raíz opcional (puedes eliminarla si no se usa)
+// Ruta raíz
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-// Catch-all para que React maneje cualquier ruta no encontrada (SPA)
+// Catch-all para SPA
 app.get("/*splat", (req, res) => {
   res.sendFile(path.resolve(__dirname, "dist", "index.html"), function (err) {
     if (err) {

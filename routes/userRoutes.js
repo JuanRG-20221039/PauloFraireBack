@@ -7,6 +7,7 @@ import {
   updateUser,
   deleteUser,
   login,
+  loginMovil,
   updateUserByEmail,
   isPasswordInHistory,
   uploadUserDocs,
@@ -25,6 +26,7 @@ router.get("/user/email/:email", checkAuth, getUserByEmail);
 // Rutas POST protegidas con autenticación (excepto login)
 router.post("/user", checkAuth, noEditor, addUser);
 router.post("/login", login);
+router.post("/loginMovil", loginMovil);
 router.post("/user/password-history", checkAuth, noEditor, isPasswordInHistory);
 
 // Rutas PUT protegidas con autenticación
